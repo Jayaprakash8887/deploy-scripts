@@ -6,25 +6,13 @@ services:
     container_name: caddy
     restart: unless-stopped
 
-    ports:
-      - "80:80"
-      - "443:443"
-
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    network_mode: host
 
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
 
-    networks:
-      - cce-net
-
 volumes:
   caddy_data:
   caddy_config:
-
-networks:
-  cce-net:
-    external: true
