@@ -1,0 +1,28 @@
+keycloak.cce.mdtlabs.org {
+    reverse_proxy keycloak:8080 {
+        header_up Host {host}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
+
+kafka.cce.mdtlabs.org {
+
+    basicauth {
+        admin $2a$14$rsGVDRqWceC6PpvK/MLNQes/AQ07g2.ySCwRfyCvtzwQFOJoUl7G.
+    }
+
+    reverse_proxy kafka-ui:8080 {
+        header_up Host {host}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto https
+    }
+}
+
+api.cce.mdtlabs.org {
+    reverse_proxy host.docker.internal:8090 {
+        header_up Host {host}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto https
+    }
+}
