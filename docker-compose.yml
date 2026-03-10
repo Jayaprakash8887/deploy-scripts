@@ -168,29 +168,6 @@ services:
     networks:
       - cce-net
 
-  cce-compliance-service:
-    image: ${CCE_COMPLIANCE_SERVICE_IMAGE:-cce-compliance-service:latest}
-    container_name: cce-compliance-service
-    restart: unless-stopped
-    depends_on:
-      - postgres
-      - kafka
-      - kafka-ui
-    ports:
-      - "8094:8080"
-    environment:
-      DB_HOST: ${POSTGRES_DB_HOST}
-      DB_PORT: ${POSTGRES_DB_PORT}
-      DB_NAME: ${POSTGRES_DB}
-      DB_USERNAME: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_POOL_SIZE: ${DB_POOL_SIZE:-20}
-      KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
-      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
-      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI}
-    networks:
-      - cce-net
-
 networks:
   cce-net:
     driver: bridge
@@ -198,4 +175,3 @@ networks:
 volumes:
   postgres_data:
   kafka_data:
-  
