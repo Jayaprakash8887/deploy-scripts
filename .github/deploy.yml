@@ -1,0 +1,35 @@
+name: Deploy CCE Services
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: "Select the environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ENV: ${{ github.event.inputs.target_env }}
+
+    steps:
+      - name: Confirm environment input
+        run: echo "Deploying to $TARGET_ENV"
+        shell: bash
+
+      - uses: actions/checkout@v6
+
+      - name: Sync files to Dev Host
+        uses: burnett01/rsync-deployments@v8
+        with:
+          switches: -av
+          path: src/
+          remote_path: ${{ vars.DEV_REMOTE_PROJECT_PATH }} # ex: /var/www/html/
+          remote_host: ${{ secrets.DEV_HOST }} # ex: example.com
+          remote_user: ${{ secrets.DEV_USER }} # ex: ubuntu
+          remote_key: ${{ secrets.DEV_SSH_KEY }}
+          
