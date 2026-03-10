@@ -28,8 +28,7 @@ jobs:
         with:
           switches: -av
           path: src/
-          remote_path: ${{ vars.DEV_REMOTE_PROJECT_PATH }} # ex: /var/www/html/
-          remote_host: ${{ secrets.DEV_HOST }} # ex: example.com
-          remote_user: ${{ secrets.DEV_USER }} # ex: ubuntu
+          remote_path: ${{ vars.DEV_REMOTE_PROJECT_PATH }}
+          remote_host: ${{ secrets.DEV_HOST }}
+          remote_user: ${{ secrets.DEV_USER }}
           remote_key: ${{ secrets.DEV_SSH_KEY }}
-          
