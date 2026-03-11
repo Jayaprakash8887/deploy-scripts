@@ -110,7 +110,7 @@ services:
       mongo:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-skf", "https://localhost:8080/heartbeat"]
+      test: ["CMD-SHELL", "node -e \"const h=require('https');h.get({hostname:'localhost',port:8080,path:'/heartbeat',rejectUnauthorized:false},r=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))\""]
       interval: 15s
       timeout: 5s
       retries: 10
