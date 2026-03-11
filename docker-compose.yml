@@ -105,7 +105,7 @@ services:
     environment:
       - mongo_url=mongodb://mongo/openhim
       - mongo_atnaUrl=mongodb://mongo/openhim
-      - api_authenticationTypes=["local"]
+      - api_authenticationTypes=["local","basic"]
     depends_on:
       mongo:
         condition: service_healthy
