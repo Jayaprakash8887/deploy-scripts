@@ -77,6 +77,94 @@ services:
     networks:
       - cce-net
 
+  # ==================== MongoDB ====================
+  mongo:
+    image: mongo:7.0
+    container_name: cce-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - cce-net
+
+  # ==================== OpenHIM Core ====================
+  openhim-core:
+    image: jembi/openhim-core:v8.4.3
+    container_name: cce-openhim-core
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+      - "8082:8080"
+    environment:
+      - mongo_url=mongodb://mongo/openhim
+      - mongo_atnaUrl=mongodb://mongo/openhim
+      - api_authenticationTypes=["local"]
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-skf", "https://localhost:8080/heartbeat"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - cce-net
+
+  # ==================== OpenHIM Console ====================
+  openhim-console:
+    image: jembi/openhim-console:v1.18.4
+    container_name: cce-openhim-console
+    ports:
+      - "9000:80"
+    depends_on:
+      openhim-core:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - cce-net
+
+  # ==================== Prometheus ====================
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: cce-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"
+    restart: unless-stopped
+    networks:
+      - cce-net
+
+  # ==================== Grafana ====================
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: cce-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - cce-net
+
   # 4) API Gateway
   gateway-service:
     image: ${GATEWAY_SERVICE_IMAGE:-gateway-service:latest}
@@ -100,6 +188,7 @@ services:
       # JWT
       JWT_ISSUER: ${JWT_ISSUER}
       JWT_AUDIENCE: ${JWT_AUDIENCE}
+      JWT_ROLES_CLAIM_PATH: ${JWT_ROLES_CLAIM_PATH}
       # Routes
       SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_0_ID: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_0_ID:-admin-service}
       SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_0_URI: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_0_URI:-http://localhost:8085}
@@ -175,3 +264,6 @@ networks:
 volumes:
   postgres_data:
   kafka_data:
+  mongo-data:
+  prometheus-data:
+  grafana-data:

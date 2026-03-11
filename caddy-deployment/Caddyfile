@@ -26,3 +26,30 @@ api.cce.mdtlabs.org {
         header_up X-Forwarded-Proto https
     }
 }
+
+openhim-api.cce.mdtlabs.org {
+    reverse_proxy localhost:8082 {
+        transport http {
+            tls_insecure_skip_verify
+        }
+        header_up Host {host}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto https
+    }
+}
+
+openhim.cce.mdtlabs.org {
+    reverse_proxy localhost:9000 {
+        header_up Host {host}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto https
+    }
+}
+
+grafana.cce.mdtlabs.org {
+    reverse_proxy localhost:3000 {
+        header_up Host {host}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto https
+    }
+}
