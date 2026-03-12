@@ -46,6 +46,17 @@ openhim.cce.mdtlabs.org {
     }
 }
 
+openhim-channel.cce.mdtlabs.org {
+    reverse_proxy localhost:5000 {
+        transport http {
+            tls_insecure_skip_verify
+        }
+        header_up Host {host}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto https
+    }
+}
+
 grafana.cce.mdtlabs.org {
     reverse_proxy localhost:3000 {
         header_up Host {host}
