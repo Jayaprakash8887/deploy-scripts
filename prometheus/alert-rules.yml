@@ -74,3 +74,57 @@ groups:
         annotations:
           summary: "CCE Emitter heap usage > 85%"
           description: "JVM heap usage exceeds 85% for >10 minutes. Consider increasing container memory limits."
+
+  - name: cce-collector-service-critical
+    rules:
+      - alert: CceCollectorDown
+        expr: up{job="cce-collector-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cce-collector-service
+        annotations:
+          summary: "CCE Collector Service is down"
+          description: "Prometheus cannot scrape the collector service for >1 minute."
+
+      - alert: CceCollectorKafkaPublishFailures
+        expr: rate(cce_collector_kafka_publish_failure_total{job="cce-collector-service"}[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: cce-collector-service
+        annotations:
+          summary: "Kafka publish failures detected"
+          description: "Events failing to publish to Kafka. Check broker connectivity."
+
+      - alert: CceCollectorDBConnectionPoolExhausted
+        expr: hikaricp_connections_pending{job="cce-collector-service"} > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cce-collector-service
+        annotations:
+          summary: "Database connection pool exhausted"
+          description: "HikariCP has pending connection requests. Increase pool size or investigate slow queries."
+
+  - name: cce-collector-service-warning
+    rules:
+      - alert: CceCollectorHighRejectionRate
+        expr: rate(cce_collector_events_rejected_total{job="cce-collector-service"}[5m]) / rate(cce_collector_events_received_total{job="cce-collector-service"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: cce-collector-service
+        annotations:
+          summary: "Event rejection rate > 10%"
+          description: "More than 10% of events are being rejected. Check source systems."
+
+      - alert: CceCollectorRejectedEventBacklog
+        expr: cce_collector_rejected_count{job="cce-collector-service"} > 100
+        for: 10m
+        labels:
+          severity: warning
+          service: cce-collector-service
+        annotations:
+          summary: "Rejected event backlog growing"
+          description: "More than 100 rejected events in the backlog for >10 minutes."
