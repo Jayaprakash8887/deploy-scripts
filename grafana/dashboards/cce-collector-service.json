@@ -234,9 +234,9 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "events/sec",
-            "drawStyle": "line",
-            "fillOpacity": 20,
+            "axisLabel": "events",
+            "drawStyle": "bars",
+            "fillOpacity": 80,
             "gradientMode": "none",
             "lineInterpolation": "smooth",
             "lineWidth": 2,
@@ -246,7 +246,7 @@
             "spanNulls": false,
             "stacking": { "group": "A", "mode": "normal" }
           },
-          "unit": "ops"
+          "unit": "short"
         },
         "overrides": [
           {
@@ -274,19 +274,19 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "rate(cce_collector_events_accepted_total{job=\"cce-collector-service\"}[5m])",
+          "expr": "increase(cce_collector_events_accepted_total{job=\"cce-collector-service\"}[1m])",
           "legendFormat": "Accepted",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "rate(cce_collector_events_rejected_total{job=\"cce-collector-service\"}[5m])",
+          "expr": "increase(cce_collector_events_rejected_total{job=\"cce-collector-service\"}[1m])",
           "legendFormat": "Rejected",
           "refId": "B"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "rate(cce_collector_events_duplicate_total{job=\"cce-collector-service\"}[5m])",
+          "expr": "increase(cce_collector_events_duplicate_total{job=\"cce-collector-service\"}[1m])",
           "legendFormat": "Duplicate",
           "refId": "C"
         }
