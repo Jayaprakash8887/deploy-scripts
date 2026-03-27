@@ -128,3 +128,87 @@ groups:
         annotations:
           summary: "Rejected event backlog growing"
           description: "More than 100 rejected events in the backlog for >10 minutes."
+
+  - name: cce-compliance-service-critical
+    rules:
+      - alert: CceComplianceDown
+        expr: up{job="cce-compliance-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cce-compliance-service
+        annotations:
+          summary: "CCE Compliance Service is down"
+          description: "Prometheus cannot scrape the compliance service for >1 minute."
+
+      - alert: CceComplianceConsumerErrors
+        expr: rate(cce_consumer_inbound_errors_total{job="cce-compliance-service"}[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: cce-compliance-service
+        annotations:
+          summary: "Inbound event consumer errors detected"
+          description: "Kafka inbound consumer is failing to process events. Messages may be going to DLQ."
+
+      - alert: CceComplianceSchedulerConsumerErrors
+        expr: rate(cce_consumer_scheduler_errors_total{job="cce-compliance-service"}[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: cce-compliance-service
+        annotations:
+          summary: "Scheduler trigger consumer errors detected"
+          description: "Kafka scheduler trigger consumer is failing. Time-based step transitions may be stalled."
+
+      - alert: CceComplianceDBConnectionPoolExhausted
+        expr: hikaricp_connections_pending{job="cce-compliance-service"} > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cce-compliance-service
+        annotations:
+          summary: "Database connection pool exhausted"
+          description: "HikariCP has pending connection requests on the compliance service."
+
+  - name: cce-compliance-service-warning
+    rules:
+      - alert: CceComplianceHighZeroMatchRate
+        expr: rate(cce_events_zero_match_total{job="cce-compliance-service"}[5m]) / rate(cce_events_processed_total{job="cce-compliance-service"}[5m]) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          service: cce-compliance-service
+        annotations:
+          summary: "More than 50% of events have zero trigger matches"
+          description: "High zero-match rate may indicate missing protocol definitions or misconfigured triggers."
+
+      - alert: CceComplianceSlowMatching
+        expr: histogram_quantile(0.99, rate(cce_step_matching_duration_seconds_bucket{job="cce-compliance-service"}[5m])) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          service: cce-compliance-service
+        annotations:
+          summary: "Step matching p99 latency > 200ms"
+          description: "Tier 1 + Tier 2 matching is slow. Check trigger_index size and DB performance."
+
+      - alert: CceComplianceSlowProcessing
+        expr: histogram_quantile(0.99, rate(cce_events_processing_duration_seconds_bucket{job="cce-compliance-service"}[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: cce-compliance-service
+        annotations:
+          summary: "Event processing p99 latency > 500ms"
+          description: "End-to-end event processing is slow. Check DB, Kafka, and matching performance."
+
+      - alert: CceComplianceHighDuplicateRate
+        expr: rate(cce_events_duplicate_total{job="cce-compliance-service"}[5m]) / rate(cce_events_processed_total{job="cce-compliance-service"}[5m]) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+          service: cce-compliance-service
+        annotations:
+          summary: "More than 20% duplicate events"
+          description: "High duplicate rate detected. May indicate upstream event replay or Kafka rebalancing."
