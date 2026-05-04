@@ -419,6 +419,52 @@ services:
     networks:
       - cce-net
 
+  cce-intelligence-service:
+    image: ${CCE_INTELLIGENCE_SERVICE_IMAGE:-cce-intelligence-service:latest}
+    container_name: cce-intelligence-service
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    depends_on:
+      - postgres
+      - kafka
+    ports:
+      - "8095:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      SERVER_PORT: 8085
+      # Database
+      DB_HOST: ${POSTGRES_DB_HOST:-cce-postgres}
+      DB_PORT: ${POSTGRES_DB_PORT:-5432}
+      DB_NAME: ${POSTGRES_DB:-ccedb}
+      DB_USERNAME: ${POSTGRES_USER:-admin}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_POOL_SIZE: ${CCE_INTELLIGENCE_DB_POOL_SIZE:-10}
+      DB_POOL_MIN_IDLE: ${CCE_INTELLIGENCE_DB_POOL_MIN_IDLE:-5}
+      # Flyway
+      SPRING_FLYWAY_TABLE: flyway_schema_history_intelligence
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "false"
+      # Kafka
+      KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      # Observability
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus,metrics
+      MANAGEMENT_METRICS_TAGS_APPLICATION: cce-intelligence-service
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    networks:
+      - cce-net
+
 networks:
   cce-net:
     driver: bridge
