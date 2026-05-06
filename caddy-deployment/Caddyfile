@@ -80,4 +80,14 @@ openmrs.cce.mdtlabs.org {
         header_up X-Forwarded-Proto https
     }
 }
- 
+
+portainer.cce.mdtlabs.org {
+    reverse_proxy localhost:9443 {
+        transport http {
+            tls_insecure_skip_verify
+        }
+        header_up Host {host}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto https
+    }
+}
