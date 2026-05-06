@@ -500,6 +500,8 @@ services:
       SCHEDULER_LOCK_ACQUIRE_DELAY: ${SCHEDULER_LOCK_ACQUIRE_DELAY:-50}
       # Flyway
       SPRING_FLYWAY_TABLE: flyway_schema_history_scheduler
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
       # Observability
       MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus,metrics
       MANAGEMENT_METRICS_TAGS_APPLICATION: cce-scheduler-service
