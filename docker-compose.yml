@@ -320,6 +320,7 @@ services:
       CCE_COLLECTOR_AUTH_TOKEN: ${CCE_COLLECTOR_AUTH_TOKEN}
       EBUZIMA_CLIENT_ID: ${EBUZIMA_CLIENT_ID}
       SPICE_CLIENT_ID: ${SPICE_CLIENT_ID}
+      OPENMRS_CLIENT_ID: ${OPENMRS_CLIENT_ID}
       KEYCLOAK_HOST: ${KEYCLOAK_HOST} 
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID} 
       KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
@@ -545,11 +546,16 @@ services:
       API_URL: /openmrs
       SPA_CONFIG_URLS: /openmrs/spa/config-core_demo.json
       SPA_DEFAULT_LOCALE:
+     # ── ADD THIS LINE ──
+    command: ["sh","-c","/docker-entrypoint.d/40-merge-custom-esms.sh; exec /usr/local/bin/startup.sh"]
     volumes:
       # EC2: /opt/openmrs/config-core_demo.json on the host
       # Local: symlink or copy your local frontend/config-core_demo.json to this path,
       #        or temporarily change back to ./frontend/config-core_demo.json for dev.
       - /opt/openmrs/config-core_demo.json:/usr/share/nginx/html/config-core_demo.json:ro
+      # ── ADD THESE TWO MOUNTS ──
+      - /opt/openmrs/frontend/40-merge-custom-esms.sh:/docker-entrypoint.d/40-merge-custom-esms.sh:ro
+      - /opt/openmrs/frontend/custom-esms:/usr/share/nginx/html/custom-esms:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]
       timeout: 5s
@@ -558,8 +564,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 128m
-          cpus: '0.25'
+          memory: 512m
+          cpus: '0.5'
     networks:
       - cce-net
 
@@ -638,6 +644,14 @@ services:
       OPENMRS_IDGEN_SOURCE_UUID: ""
       OPENMRS_IDENTIFIER_TYPE_NAME: "OpenMRS ID"
       OPENMRS_CAPABILITY_REFRESH_MS: "21600000"
+      # SPICE FHIR demographics enrichment (RelatedPerson lookup by national-id)
+      SPICE_FHIR_ENABLED: ${SPICE_FHIR_ENABLED:-false}
+      SPICE_FHIR_BASE_URL: ${SPICE_FHIR_BASE_URL:-}
+      SPICE_FHIR_TOKEN: ${SPICE_FHIR_TOKEN:-}
+      SPICE_FHIR_CLIENT: ${SPICE_FHIR_CLIENT:-mob}
+      SPICE_FHIR_LOOKUP_RESOURCE: ${SPICE_FHIR_LOOKUP_RESOURCE:-RelatedPerson}
+      SPICE_FHIR_IDENTIFIER_SYSTEM: ${SPICE_FHIR_IDENTIFIER_SYSTEM:-http://mdtlabs.com/national-id}
+      SPICE_FHIR_TIMEOUT: ${SPICE_FHIR_TIMEOUT:-30000}
       CCE_SECURITY_ENABLED: "false"
       CCE_SECURITY_TOKEN: ""
       LOG_LEVEL: INFO
@@ -649,6 +663,55 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    networks:
+      - cce-net
+
+  # ==================== OpenMRS CCE Emitter Adaptor ====================
+  # Polls OpenMRS FHIR R4 for resource changes and forwards to OpenHIM.
+  # See openphc/openmrs-cce-emitter-adaptor (branch: demo) for source.
+  openmrs-cce-emitter-adaptor:
+    image: ${CCE_OPENMRS_EMITTER_ADAPTOR_IMAGE:-openmrs-cce-emitter-adaptor:latest}
+    container_name: openmrs-cce-emitter-adaptor
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    depends_on:
+      backend:
+        condition: service_healthy
+      openhim-core:
+        condition: service_healthy
+    ports:
+      - "8099:8085"
+    volumes:
+      - openmrs-emitter-data:/app/data
+    environment:
+      SERVER_PORT: "8085"
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx512m -XX:+UseG1GC"
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      # OpenMRS — reached via the O3 gateway container on cce-net
+      OPENMRS_BASE_URL: ${OPENMRS_EMITTER_OPENMRS_BASE_URL:-http://gateway:80/openmrs}
+      OPENMRS_AUTH_USERNAME: ${OPENMRS_EMITTER_OPENMRS_AUTH_USERNAME:-${OPENMRS_USERNAME:-admin}}
+      OPENMRS_AUTH_PASSWORD: ${OPENMRS_EMITTER_OPENMRS_AUTH_PASSWORD:-${OPENMRS_PASSWORD:-Admin123}}
+      # OpenHIM — same core the openhim-cce-emitter-adaptor and receiver use
+      OPENHIM_BASE_URL: ${OPENMRS_EMITTER_OPENHIM_BASE_URL:-http://cce-openhim-core:5001/openmrs/fhir}
+      OPENHIM_AUTH_USERNAME: ${OPENMRS_EMITTER_OPENHIM_AUTH_USERNAME:-openmrs-fhir-client}
+      OPENHIM_AUTH_PASSWORD: ${OPENMRS_EMITTER_OPENHIM_AUTH_PASSWORD:-password}
+      # Checkpoint persistence (volume mount)
+      CHECKPOINT_FILE_PATH: /app/data/checkpoints.json
+      MANAGEMENT_METRICS_TAGS_APPLICATION: openmrs-cce-emitter-adaptor
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8085/actuator/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 768M
     networks:
       - cce-net
 
@@ -728,6 +791,7 @@ volumes:
   mongo-data:
   prometheus-data:
   grafana-data:
+  openmrs-emitter-data:
   openmrs-data:
     external: true
     name: o3_openmrs-data
