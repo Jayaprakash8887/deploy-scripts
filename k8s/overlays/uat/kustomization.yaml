@@ -20,15 +20,15 @@ secretGenerator:
   - name: cce-secrets
     literals:
       - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=CHANGE_ME_UAT
-      - CCE_COLLECTOR_AUTH_TOKEN=CHANGE_ME_UAT
+      - POSTGRES_PASSWORD=cceuat@2024
+      - CCE_COLLECTOR_AUTH_TOKEN=cce-uat-token-2024
       - GRAFANA_ADMIN_USER=admin
-      - GRAFANA_ADMIN_PASSWORD=CHANGE_ME_UAT
+      - GRAFANA_ADMIN_PASSWORD=grafana@uat2024
 
 generatorOptions:
   disableNameSuffixHash: true
 
-# UAT-specific patches — lower resource limits
+# UAT-specific patches — lower resource limits + imagePullPolicy: Never
 patches:
   - target:
       kind: Deployment
@@ -37,6 +37,9 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/memory
         value: 512Mi
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
   - target:
       kind: Deployment
       name: cce-insights-service
@@ -44,6 +47,57 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/memory
         value: 512Mi
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: cce-collector-service
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: cce-emitter-adaptor
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: cce-scheduler-service
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: cce-insights-ui
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+
+images:
+  - name: ghcr.io/openphc/cce-collector-service
+    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/cce-collector-service
+    newTag: latest
+  - name: ghcr.io/openphc/cce-compliance-service
+    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/cce-compliance-service
+    newTag: latest
+  - name: ghcr.io/openphc/openhim-cce-emitter-adaptor
+    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/openhim-cce-emmitter-adaptor
+    newTag: latest
+  - name: ghcr.io/openphc/cce-insights-service
+    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/cce-insights-service
+    newTag: latest
+  - name: ghcr.io/openphc/cce-insights-ui
+    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/cce-insights-ui
+    newTag: latest
+  - name: ghcr.io/openphc/cce-scheduler-service
+    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/cce-scheduler-service
+    newTag: latest
 
 commonLabels:
   environment: uat
