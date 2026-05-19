@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cce-emitter-adaptor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cce-emitter-adaptor
+  template:
+    metadata:
+      labels:
+        app: cce-emitter-adaptor
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: "8082"
+    spec:
+      containers:
+        - name: cce-emitter-adaptor
+          image: ghcr.io/openphc/openhim-cce-emitter-adaptor:release-1.0.0
+          ports:
+            - containerPort: 8082
+          env:
+            - name: CCE_COLLECTOR_URL
+              value: "http://cce-collector-service:8080"
+            - name: CCE_COLLECTOR_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cce-secrets
+                  key: CCE_COLLECTOR_AUTH_TOKEN
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "health,info,prometheus,metrics"
+            - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+              value: "cce-emitter-adaptor"
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 500m
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cce-emitter-adaptor
+spec:
+  selector:
+    app: cce-emitter-adaptor
+  ports:
+    - port: 8082
+      targetPort: 8082

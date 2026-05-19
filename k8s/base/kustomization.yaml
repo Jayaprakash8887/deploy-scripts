@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # Infrastructure (Kafka UI only — Postgres & Kafka run on host)
+  - infrastructure/kafka-ui.yaml
+  # Application Services
+  - services/cce-emitter-adaptor.yaml
+  - services/cce-collector-service.yaml
+  - services/cce-compliance-service.yaml
+  - services/cce-scheduler-service.yaml
+  - services/cce-insights-service.yaml
+  - services/cce-insights-ui.yaml
+  # Monitoring
+  - monitoring/prometheus.yaml
+  - monitoring/grafana.yaml
+  - monitoring/node-exporter.yaml
+  # Networking
+  - network-policy.yaml
+  - ingress.yaml
