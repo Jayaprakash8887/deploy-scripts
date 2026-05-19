@@ -1,4 +1,5 @@
 .env
+k8s/**/*.rendered
 docs/
 remote-deployment/
 .vscode/
