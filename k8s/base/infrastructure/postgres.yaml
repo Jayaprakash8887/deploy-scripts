@@ -1,0 +1,10 @@
+# ExternalName service pointing to host-installed PostgreSQL.
+# Pods connect to "postgres:<port>" — resolved to the host VM.
+# Port is configured per environment in overlays (UAT: 5432, PROD: 5433).
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  type: ExternalName
+  externalName: host.k3s.internal

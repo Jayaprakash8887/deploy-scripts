@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cce-insights-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cce-insights-service
+  template:
+    metadata:
+      labels:
+        app: cce-insights-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: "8084"
+    spec:
+      containers:
+        - name: cce-insights-service
+          image: ghcr.io/openphc/cce-insights-service:demo
+          ports:
+            - containerPort: 8084
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: SERVER_PORT
+              value: "8084"
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: cce-config
+                  key: POSTGRES_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: cce-config
+                  key: POSTGRES_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: cce-config
+                  key: POSTGRES_DB
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cce-secrets
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cce-secrets
+                  key: POSTGRES_PASSWORD
+            - name: DB_POOL_SIZE
+              value: "10"
+            - name: CACHE_TTL_LOOKUPS
+              value: "60"
+            - name: CACHE_TTL_ANALYTICS
+              value: "30"
+            - name: CACHE_TTL_METRICS
+              value: "15"
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "health,info,prometheus,metrics"
+            - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+              value: "cce-insights-service"
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 200m
+            limits:
+              memory: 1Gi
+              cpu: "1"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8084
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8084
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cce-insights-service
+spec:
+  selector:
+    app: cce-insights-service
+  ports:
+    - port: 8084
+      targetPort: 8084

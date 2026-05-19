@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cce-collector-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cce-collector-service
+  template:
+    metadata:
+      labels:
+        app: cce-collector-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+        - name: cce-collector-service
+          image: ghcr.io/openphc/cce-collector-service:release-1.0.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: cce-config
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: cce-config
+                  key: POSTGRES_PORT
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: cce-config
+                  key: POSTGRES_DB
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cce-secrets
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cce-secrets
+                  key: POSTGRES_PASSWORD
+            - name: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+              value: "10"
+            - name: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+              value: "5"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: cce-config
+                  key: KAFKA_BOOTSTRAP_SERVERS
+            - name: SPRING_KAFKA_PRODUCER_ACKS
+              value: "all"
+            - name: SPRING_KAFKA_PRODUCER_RETRIES
+              value: "3"
+            - name: CCE_COLLECTOR_DEDUP_LOOKBACK_DAYS
+              value: "30"
+            - name: CCE_COLLECTOR_MAX_PAYLOAD_SIZE
+              value: "1048576"
+            - name: CCE_COLLECTOR_FHIR_STRICT_VALIDATION
+              value: "false"
+            - name: CCE_COLLECTOR_KAFKA_TOPICS_INBOUND
+              value: "cce.events.inbound"
+            - name: CCE_COLLECTOR_KAFKA_TOPICS_DEAD_LETTER
+              value: "cce.deadletter"
+            - name: CCE_COLLECTOR_KAFKA_PUBLISH_TIMEOUT_SECONDS
+              value: "30"
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "health,info,prometheus,metrics"
+            - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+              value: "cce-collector-service"
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 200m
+            limits:
+              memory: 768Mi
+              cpu: "1"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cce-collector-service
+spec:
+  selector:
+    app: cce-collector-service
+  ports:
+    - port: 8080
+      targetPort: 8080
