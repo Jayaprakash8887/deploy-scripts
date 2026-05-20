@@ -61,10 +61,10 @@ spec:
               value: "600000"
             - name: DB_MAX_LIFETIME
               value: "1800000"
-            - name: SPRING_FLYWAY_TABLE
-              value: "flyway_schema_history_compliance"
-            - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+            - name: SPRING_FLYWAY_ENABLED
               value: "false"
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "update"
             - name: KAFKA_BOOTSTRAP_SERVERS
               valueFrom:
                 configMapKeyRef:
@@ -89,7 +89,7 @@ spec:
               memory: 256Mi
               cpu: 200m
             limits:
-              memory: 1Gi
+              memory: 1536Mi
               cpu: "1"
           livenessProbe:
             httpGet:

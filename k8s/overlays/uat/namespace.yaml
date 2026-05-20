@@ -12,10 +12,10 @@ metadata:
   namespace: cce-uat
 spec:
   hard:
-    requests.cpu: "3"
-    requests.memory: 4Gi
-    limits.cpu: "5"
-    limits.memory: 8Gi
+    requests.cpu: "6"
+    requests.memory: 8Gi
+    limits.cpu: "10"
+    limits.memory: 12Gi
 ---
 apiVersion: v1
 kind: LimitRange
@@ -25,9 +25,9 @@ metadata:
 spec:
   limits:
     - default:
-        memory: 512Mi
-        cpu: 500m
+        memory: 1Gi
+        cpu: "1"
       defaultRequest:
-        memory: 128Mi
-        cpu: 100m
+        memory: 256Mi
+        cpu: 200m
       type: Container

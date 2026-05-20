@@ -63,6 +63,8 @@ spec:
               value: "health,info,prometheus,metrics"
             - name: MANAGEMENT_METRICS_TAGS_APPLICATION
               value: "cce-insights-service"
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "update"
           resources:
             requests:
               memory: 256Mi

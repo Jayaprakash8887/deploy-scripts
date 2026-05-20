@@ -30,10 +30,13 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Allow connections to host-installed Postgres and Kafka
+    # Allow connections to host-installed Postgres and Kafka (via host IP and Docker bridge)
+    # NOTE: Replace VM_HOST_CIDR with the actual VM IP/32 at deploy time
     - to:
         - ipBlock:
-            cidr: 10.43.0.1/32
+            cidr: ${VM_HOST_CIDR}
+        - ipBlock:
+            cidr: 172.18.0.0/16
       ports:
         - protocol: TCP
           port: 5432

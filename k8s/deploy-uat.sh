@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Deploy CCE UAT environment to k3s
+# Usage: ./deploy-uat.sh
+#
+# Requires: .env file in k8s/ directory (copy from .env.example)
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="${SCRIPT_DIR}/.env"
+
+if [[ ! -f "$ENV_FILE" ]]; then
+  echo "ERROR: $ENV_FILE not found. Copy .env.example to .env and fill in values."
+  exit 1
+fi
+
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+
+export VM_HOST_IP VM_HOST_CIDR
+
+echo "Deploying CCE UAT with VM_HOST_IP=${VM_HOST_IP}"
+
+# Generate final manifests with variable substitution
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+
+# Substitute variables in kustomization overlay
+envsubst < "${SCRIPT_DIR}/overlays/uat/kustomization.yaml" > "${TMPDIR}/kustomization.yaml"
+cp "${TMPDIR}/kustomization.yaml" "${SCRIPT_DIR}/overlays/uat/kustomization.yaml.rendered"
+
+# Substitute variables in network policy
+envsubst < "${SCRIPT_DIR}/base/network-policy.yaml" > "${TMPDIR}/network-policy.yaml"
+cp "${TMPDIR}/network-policy.yaml" "${SCRIPT_DIR}/base/network-policy.yaml.rendered"
+
+# Apply using kustomize with rendered files
+# First apply the network policy directly (it has the IP substitution)
+kubectl apply -f "${TMPDIR}/network-policy.yaml" -n cce-uat
+
+# For kustomize, we need to temporarily swap in the rendered file
+cp "${SCRIPT_DIR}/overlays/uat/kustomization.yaml" "${SCRIPT_DIR}/overlays/uat/kustomization.yaml.tpl"
+cp "${TMPDIR}/kustomization.yaml" "${SCRIPT_DIR}/overlays/uat/kustomization.yaml"
+
+kubectl apply -k "${SCRIPT_DIR}/overlays/uat"
+
+# Restore template
+mv "${SCRIPT_DIR}/overlays/uat/kustomization.yaml.tpl" "${SCRIPT_DIR}/overlays/uat/kustomization.yaml"
+
+# Clean up rendered files
+rm -f "${SCRIPT_DIR}/overlays/uat/kustomization.yaml.rendered"
+rm -f "${SCRIPT_DIR}/base/network-policy.yaml.rendered"
+
+echo "Deployment complete. Check pods: kubectl -n cce-uat get pods"
