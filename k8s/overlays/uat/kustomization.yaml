@@ -16,7 +16,7 @@ configMapGenerator:
       - KAFKA_BOOTSTRAP_SERVERS=${VM_HOST_IP}:9093
       - KAFKA_UI_CLUSTER_NAME=cce-uat
       - OPENHIM_CORE_HOST=197.243.24.138
-      - KEYCLOAK_HOST=
+      - KEYCLOAK_HOST=http://keycloak:8080/auth
 
 secretGenerator:
   - name: cce-secrets
