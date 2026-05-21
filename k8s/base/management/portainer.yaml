@@ -50,6 +50,8 @@ spec:
         app: portainer
     spec:
       serviceAccountName: portainer-sa
+      securityContext:
+        runAsUser: 0
       containers:
         - name: portainer
           image: portainer/portainer-ce:2.21.5
@@ -61,6 +63,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
           resources:
             requests:
               memory: 128Mi
@@ -72,6 +76,10 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: portainer-data
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
 ---
 apiVersion: v1
 kind: Service
