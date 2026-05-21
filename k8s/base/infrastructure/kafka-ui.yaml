@@ -30,11 +30,11 @@ spec:
                   key: KAFKA_BOOTSTRAP_SERVERS
           resources:
             requests:
-              memory: 128Mi
+              memory: 256Mi
               cpu: 100m
             limits:
-              memory: 256Mi
-              cpu: 250m
+              memory: 512Mi
+              cpu: 500m
 ---
 apiVersion: v1
 kind: Service
