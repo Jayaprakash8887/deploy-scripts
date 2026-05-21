@@ -14,19 +14,17 @@ spec:
     spec:
       containers:
         - name: keycloak
-          image: quay.io/keycloak/keycloak:26.0
+          image: quay.io/keycloak/keycloak:20.0
           args:
             - start
             - --http-relative-path=/auth
-            - --proxy-headers=xforwarded
+            - --proxy=edge
             - --hostname-strict=false
           ports:
             - containerPort: 8080
           env:
             - name: KC_DB
               value: "postgres"
-            - name: KC_DB_URL
-              value: "jdbc:postgresql://$(DB_HOST):$(DB_PORT)/keycloak"
             - name: DB_HOST
               valueFrom:
                 configMapKeyRef:
@@ -37,6 +35,8 @@ spec:
                 configMapKeyRef:
                   name: cce-config
                   key: POSTGRES_PORT
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://$(DB_HOST):$(DB_PORT)/keycloak"
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -47,12 +47,12 @@ spec:
                 secretKeyRef:
                   name: cce-secrets
                   key: POSTGRES_PASSWORD
-            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+            - name: KEYCLOAK_ADMIN
               valueFrom:
                 secretKeyRef:
                   name: cce-secrets
                   key: KEYCLOAK_ADMIN_USER
-            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+            - name: KEYCLOAK_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: cce-secrets
