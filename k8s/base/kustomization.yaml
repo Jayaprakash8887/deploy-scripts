@@ -18,5 +18,3 @@ resources:
   # Networking
   - network-policy.yaml
   - ingress.yaml
-  # Management
-  - management/portainer.yaml
