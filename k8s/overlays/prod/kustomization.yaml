@@ -36,8 +36,15 @@ secretGenerator:
 generatorOptions:
   disableNameSuffixHash: true
 
-# PROD-specific patches — higher resources
+# PROD-specific patches — host-based routing and higher resources
 patches:
+  - target:
+      kind: Ingress
+      name: cce-ingress
+    patch: |
+      - op: add
+        path: /spec/rules/0/host
+        value: ${INGRESS_HOST}
   - target:
       kind: Deployment
       name: cce-compliance-service
@@ -59,20 +66,25 @@ patches:
         path: /spec/template/spec/containers/0/resources/requests/cpu
         value: 500m
 
-# Use release images for PROD
 images:
-  - name: ghcr.io/openphc/openhim-cce-emitter-adaptor
-    newTag: release-1.0.0
   - name: ghcr.io/openphc/cce-collector-service
-    newTag: release-1.0.0
+    newName: ghcr.io/openphc/cce-collector-service:latest
+    newTag: latest
   - name: ghcr.io/openphc/cce-compliance-service
-    newTag: release-1.0.0
-  - name: ghcr.io/openphc/cce-scheduler-service
-    newTag: demo
+    newName: ghcr.io/openphc/cce-compliance-service:latest
+    newTag: latest
+  - name: ghcr.io/openphc/openhim-cce-emitter-adaptor
+    newName: ghcr.io/openphc/openhim-cce-emitter-adaptor:latest
+    newTag: latest
   - name: ghcr.io/openphc/cce-insights-service
-    newTag: demo
+    newName: ghcr.io/openphc/cce-insights-service:latest
+    newTag: latest
   - name: ghcr.io/openphc/cce-insights-ui
-    newTag: demo
+    newName: ghcr.io/openphc/cce-insights-ui:latest
+    newTag: latest
+  - name: ghcr.io/openphc/cce-scheduler-service
+    newName: ghcr.io/openphc/cce-scheduler-service:latest
+    newTag: latest
 
 commonLabels:
   environment: prod

@@ -1,0 +1,27 @@
+<clickhouse>
+    <profiles>
+        <!-- Analytics profile: FINAL applied automatically so reads from cce-insights-service
+             (and ad-hoc queries) get correct deduplication without explicit FINAL clauses. -->
+        <analytics>
+            <final>1</final>
+            <max_memory_usage>10000000000</max_memory_usage>
+            <max_execution_time>60</max_execution_time>
+            <readonly>1</readonly>
+        </analytics>
+    </profiles>
+
+    <users>
+        <!-- cce-insights-service / analysts: read-only with automatic FINAL.
+             (Kafka-engine consumer MVs run under the ClickHouse server context, so no separate
+             CDC-writer user is needed — Debezium writes to Kafka, not to ClickHouse.) -->
+        <cce_pipeline>
+            <password_sha256_hex/>
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <profile>analytics</profile>
+            <quota>default</quota>
+            <access_management>0</access_management>
+        </cce_pipeline>
+    </users>
+</clickhouse>

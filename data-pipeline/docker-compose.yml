@@ -1,0 +1,91 @@
+# CCE Data Pipeline — ClickHouse + Kafka Connect (Debezium CDC)
+# Vendored from openphc/cce-data-pipeline (demo branch) for the MedLabs deploy-scripts stack.
+#
+# Attaches to the EXISTING `cce-net` network created by the root docker-compose.yml and reads
+# from the existing `postgres` (ccedb) and `kafka` services. Start the platform stack first.
+#
+# Usage (run from this directory):
+#   cp .env.example .env            # then edit CDC_PASSWORD / CLICKHOUSE_PASSWORD
+#   set -a; source .env; set +a
+#   docker compose up -d
+#   # then: apply schema/*.sql, cdc/01-configure-replication.sql, ./scripts/register-connectors.sh
+#   # see README / scripts/ for the full init + validation sequence.
+#
+# NOTE: ClickHouse native port is published on host 9009 (not 9000) to avoid colliding with
+#       openhim-console (host 9000) in the root stack. In-network clients still use clickhouse:9000.
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:26.3-alpine
+    container_name: cce-clickhouse
+    restart: unless-stopped
+    ports:
+      - "8123:8123"     # HTTP interface
+      - "9009:9000"     # Native protocol (host 9009 -> container 9000; avoids openhim-console 9000)
+      - "9363:9363"     # Prometheus metrics
+    environment:
+      CLICKHOUSE_DB: cce_analytics
+      CLICKHOUSE_USER: cce_pipeline
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-cce_analytics_dev}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./infra/clickhouse/config.xml:/etc/clickhouse-server/config.d/custom.xml:ro
+      - ./infra/clickhouse/named-collections.xml:/etc/clickhouse-server/config.d/named-collections.xml:ro
+      - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.d/cce_pipeline.xml:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    networks: [cce-net]
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+
+  kafka-connect:
+    image: quay.io/debezium/connect:3.0.0.Final
+    container_name: cce-kafka-connect
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      GROUP_ID: cce-connect
+      CONFIG_STORAGE_TOPIC: cce_connect_configs
+      OFFSET_STORAGE_TOPIC: cce_connect_offsets
+      STATUS_STORAGE_TOPIC: cce_connect_statuses
+      CONFIG_STORAGE_REPLICATION_FACTOR: "1"
+      OFFSET_STORAGE_REPLICATION_FACTOR: "1"
+      STATUS_STORAGE_REPLICATION_FACTOR: "1"
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8083/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    networks: [cce-net]
+
+volumes:
+  clickhouse-data:
+
+networks:
+  cce-net:
+    external: true
+    # The root docker-compose.yml names its network <project>_cce-net. With the deploy-scripts
+    # project that resolves to deploy-scripts_cce-net — point at it explicitly so this stack
+    # joins the SAME network as postgres/kafka rather than creating a new isolated one.
+    name: deploy-scripts_cce-net
