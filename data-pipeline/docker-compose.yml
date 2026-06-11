@@ -83,3 +83,8 @@ services:
 
 volumes:
   clickhouse-data:
+
+networks:
+  cce-net:
+    external: true
+    name: cce-net

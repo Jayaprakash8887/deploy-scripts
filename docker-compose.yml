@@ -800,6 +800,7 @@ services:
 
 networks:
   cce-net:
+    name: cce-net
     driver: bridge
 
 volumes:
