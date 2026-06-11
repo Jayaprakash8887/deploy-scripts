@@ -294,10 +294,6 @@ services:
       timeout: 5s
       start_period: 15s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 512M
     networks:
       - cce-net
   
@@ -414,10 +410,6 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 1G
     networks:
       - cce-net
 
@@ -460,10 +452,6 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 1G
     networks:
       - cce-net
 
@@ -515,10 +503,6 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 768M
     networks:
       - cce-net
 
@@ -732,10 +716,6 @@ services:
     # No container healthcheck: Paketo image ships no shell or probe binary
     # (no /bin/sh, wget, or curl). Liveness/readiness are exposed via
     # http://<host>:8099/actuator/health and Prometheus.
-    deploy:
-      resources:
-        limits:
-          memory: 768M
     networks:
       - cce-net
 
@@ -773,10 +753,6 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 1G
     networks:
       - cce-net
 
@@ -797,10 +773,6 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 256M
     networks:
       - cce-net
 
