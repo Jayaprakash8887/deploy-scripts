@@ -524,6 +524,7 @@ services:
 
   gateway:
     image: openmrs/openmrs-reference-application-3-gateway:3.6.0
+    container_name: openmrs-gateway
     restart: "unless-stopped"
     depends_on:
       - frontend
@@ -540,6 +541,7 @@ services:
 
   frontend:
     image: openmrs/openmrs-reference-application-3-frontend:3.6.0
+    container_name: openmrs-frontend
     restart: "unless-stopped"
     environment:
       SPA_PATH: /openmrs/spa
@@ -576,6 +578,7 @@ services:
 
   backend:
     image: openmrs/openmrs-reference-application-3-backend:3.6.0
+    container_name: openmrs-backend
     restart: "unless-stopped"
     depends_on:
       - db
@@ -604,6 +607,7 @@ services:
   # MariaDB
   db:
     image: mariadb:10.11.7
+    container_name: openmrs-db
     restart: "unless-stopped"
     command: "mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci"
     healthcheck:
