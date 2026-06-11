@@ -1,0 +1,42 @@
+{
+  "name": "cce-ccedb-source",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+
+    "database.hostname": "${CDC_PG_HOST}",
+    "database.port": "${CDC_PG_PORT}",
+    "database.user": "${CDC_USER}",
+    "database.password": "${CDC_PASSWORD}",
+    "database.dbname": "${CDC_PG_DATABASE}",
+
+    "topic.prefix": "cce",
+    "plugin.name": "pgoutput",
+    "slot.name": "cce_analytics_slot",
+    "publication.name": "cce_analytics_pub",
+    "publication.autocreate.mode": "disabled",
+
+    "snapshot.mode": "initial",
+    "table.include.list": "public.inbound_event_log,public.protocol_definition,public.protocol_instance,public.step_instance,public.deviation,public.intelligence_event_log,public.intelligence_delivery,public.action_definition,public.compliance_event_log",
+    "column.exclude.list": "public.intelligence_event_log.event_payload,public.intelligence_delivery.fhir_payload",
+
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+
+    "tombstones.on.delete": "false",
+    "decimal.handling.mode": "string",
+    "time.precision.mode": "adaptive_time_microseconds",
+
+    "post.processors": "reselector",
+    "reselector.type": "io.debezium.processors.reselect.ReselectColumnsPostProcessor",
+    "reselector.reselect.columns.include.list": "public.inbound_event_log:raw_payload,public.protocol_definition:definition,public.action_definition:definition",
+    "reselector.reselect.unavailable.values": "true",
+    "reselector.reselect.null.values": "false",
+
+    "heartbeat.interval.ms": "10000",
+    "topic.creation.default.replication.factor": "1",
+    "topic.creation.default.partitions": "1"
+  }
+}

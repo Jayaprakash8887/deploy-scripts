@@ -16,7 +16,7 @@ fi
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 
-export VM_HOST_IP VM_HOST_CIDR
+export VM_HOST_IP VM_HOST_CIDR INGRESS_HOST
 
 echo "Deploying CCE UAT with VM_HOST_IP=${VM_HOST_IP}"
 

@@ -39,6 +39,13 @@ generatorOptions:
 # UAT-specific patches — imagePullPolicy: Never (images pre-loaded into containerd)
 patches:
   - target:
+      kind: Ingress
+      name: cce-ingress
+    patch: |
+      - op: add
+        path: /spec/rules/0/host
+        value: ${INGRESS_HOST}
+  - target:
       kind: Deployment
       name: cce-collector-service
     patch: |
@@ -83,22 +90,22 @@ patches:
 
 images:
   - name: ghcr.io/openphc/cce-collector-service
-    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/cce-collector-service
+    newName: ghcr.io/openphc/cce-collector-service:latest
     newTag: latest
   - name: ghcr.io/openphc/cce-compliance-service
-    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/cce-compliance-service
+    newName: ghcr.io/openphc/cce-compliance-service:latest
     newTag: latest
   - name: ghcr.io/openphc/openhim-cce-emitter-adaptor
-    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/openhim-cce-emmitter-adaptor
+    newName: ghcr.io/openphc/openhim-cce-emitter-adaptor:latest
     newTag: latest
   - name: ghcr.io/openphc/cce-insights-service
-    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/cce-insights-service
+    newName: ghcr.io/openphc/cce-insights-service:latest
     newTag: latest
   - name: ghcr.io/openphc/cce-insights-ui
-    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/cce-insights-ui
+    newName: ghcr.io/openphc/cce-insights-ui:latest
     newTag: latest
   - name: ghcr.io/openphc/cce-scheduler-service
-    newName: 006250192066.dkr.ecr.ap-south-1.amazonaws.com/cce/cce-scheduler-service
+    newName: ghcr.io/openphc/cce-scheduler-service:latest
     newTag: latest
 
 commonLabels:
