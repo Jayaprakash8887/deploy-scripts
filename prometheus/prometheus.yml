@@ -28,3 +28,9 @@ scrape_configs:
     metrics_path: /actuator/prometheus
     static_configs:
       - targets: ["cce-compliance-service:8080"]
+
+  # Data pipeline — ClickHouse server metrics (analytics store)
+  - job_name: "clickhouse"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["clickhouse:9363"]
