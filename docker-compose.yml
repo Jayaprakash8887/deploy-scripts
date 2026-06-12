@@ -521,8 +521,8 @@ services:
     container_name: openmrs-gateway
     restart: "unless-stopped"
     depends_on:
-      - frontend
-      - backend
+      - openmrs-frontend
+      - openmrs-backend
     ports:
       - "8096:80"
     deploy:
@@ -575,7 +575,7 @@ services:
     container_name: openmrs-backend
     restart: "unless-stopped"
     depends_on:
-      - db
+      - openmrs-db
     environment:
       OMRS_CONFIG_MODULE_WEB_ADMIN: "true"
       OMRS_CONFIG_AUTO_UPDATE_DATABASE: "true"
