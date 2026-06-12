@@ -561,7 +561,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost/"]
       timeout: 5s
     depends_on:
-      - backend
+      - openmrs-backend
     deploy:
       resources:
         limits:
@@ -580,7 +580,7 @@ services:
       OMRS_CONFIG_MODULE_WEB_ADMIN: "true"
       OMRS_CONFIG_AUTO_UPDATE_DATABASE: "true"
       OMRS_CONFIG_CREATE_TABLES: "true"
-      OMRS_CONFIG_CONNECTION_SERVER: db
+      OMRS_CONFIG_CONNECTION_SERVER: openmrs-db
       OMRS_CONFIG_CONNECTION_DATABASE: openmrs
       OMRS_CONFIG_CONNECTION_USERNAME: ${OMRS_DB_USER:-openmrs}
       OMRS_CONFIG_CONNECTION_PASSWORD: ${OMRS_DB_PASSWORD:-openmrs}
@@ -636,11 +636,11 @@ services:
     ports:
       - "8097:8080"
     depends_on:
-      backend:
+      openmrs-backend:
         condition: service_healthy
     environment:
-      OPENMRS_REST_BASE_URL: ${OPENMRS_REST_BASE_URL:-http://gateway:80/openmrs/ws/rest/v1}
-      OPENMRS_FHIR_BASE_URL: ${OPENMRS_FHIR_BASE_URL:-http://gateway:80/openmrs/ws/fhir2/R4}
+      OPENMRS_REST_BASE_URL: ${OPENMRS_REST_BASE_URL:-http://openmrs-gateway:80/openmrs/ws/rest/v1}
+      OPENMRS_FHIR_BASE_URL: ${OPENMRS_FHIR_BASE_URL:-http://openmrs-gateway:80/openmrs/ws/fhir2/R4}
       OPENMRS_REST_TIMEOUT: "30000"
       OPENMRS_FHIR_TIMEOUT: "30000"
       OPENMRS_AUTH_TYPE: basic
@@ -689,7 +689,7 @@ services:
         max-size: "50m"
         max-file: "3"
     depends_on:
-      backend:
+      openmrs-backend:
         condition: service_healthy
       openhim-core:
         condition: service_healthy
@@ -708,7 +708,7 @@ services:
       # root logger and stdout is silenced after the Spring Boot banner.
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-production}
       # OpenMRS — reached via the O3 gateway container on cce-net
-      OPENMRS_BASE_URL: ${OPENMRS_EMITTER_OPENMRS_BASE_URL:-http://gateway:80/openmrs}
+      OPENMRS_BASE_URL: ${OPENMRS_EMITTER_OPENMRS_BASE_URL:-http://openmrs-gateway:80/openmrs}
       OPENMRS_AUTH_USERNAME: ${OPENMRS_EMITTER_OPENMRS_AUTH_USERNAME:-${OPENMRS_USERNAME:-admin}}
       OPENMRS_AUTH_PASSWORD: ${OPENMRS_EMITTER_OPENMRS_AUTH_PASSWORD:-${OPENMRS_PASSWORD:-Admin123}}
       # OpenHIM — same core the openhim-cce-emitter-adaptor and receiver use
