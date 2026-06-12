@@ -288,6 +288,10 @@ services:
       # Authorization
       AUTHORIZATION_ENABLED: ${AUTHORIZATION_ENABLED}
       LOAD_PERMISSIONS_FROM_DATABASE_ON_STARTUP: ${LOAD_PERMISSIONS_FROM_DATABASE_ON_STARTUP}
+      # Flyway
+      SPRING_FLYWAY_TABLE: flyway_schema_history_gateway
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/actuator/health"]
       interval: 30s
@@ -360,6 +364,10 @@ services:
       # Actuator / Prometheus metrics
       MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus,metrics
       MANAGEMENT_METRICS_TAGS_APPLICATION: cce-collector-service
+      # Flyway
+      SPRING_FLYWAY_TABLE: flyway_schema_history_collector
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
     networks:
       - cce-net
 
@@ -393,7 +401,8 @@ services:
       DB_MAX_LIFETIME: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:-1800000}
       # Flyway (separate migration history from collector service)
       SPRING_FLYWAY_TABLE: flyway_schema_history_compliance
-      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "false"
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
       # Kafka
       KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
       KAFKA_CONCURRENCY: ${CCE_COMPLIANCE_KAFKA_CONCURRENCY:-5}
@@ -440,7 +449,8 @@ services:
       DB_POOL_MIN_IDLE: ${CCE_INTELLIGENCE_DB_POOL_MIN_IDLE:-5}
       # Flyway
       SPRING_FLYWAY_TABLE: flyway_schema_history_intelligence
-      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "false"
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
       # Kafka
       KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
       # Observability
@@ -506,7 +516,7 @@ services:
     networks:
       - cce-net
 
-  gateway:
+  openmrs-gateway:
     image: openmrs/openmrs-reference-application-3-gateway:3.6.0
     container_name: openmrs-gateway
     restart: "unless-stopped"
@@ -523,7 +533,7 @@ services:
     networks:
       - cce-net
 
-  frontend:
+  openmrs-frontend:
     image: openmrs/openmrs-reference-application-3-frontend:3.6.0
     container_name: openmrs-frontend
     restart: "unless-stopped"
@@ -560,7 +570,7 @@ services:
     networks:
       - cce-net
 
-  backend:
+  openmrs-backend:
     image: openmrs/openmrs-reference-application-3-backend:3.6.0
     container_name: openmrs-backend
     restart: "unless-stopped"
@@ -592,7 +602,7 @@ services:
       - cce-net
 
   # MariaDB
-  db:
+  openmrs-db:
     image: mariadb:10.11.7
     container_name: openmrs-db
     restart: "unless-stopped"
