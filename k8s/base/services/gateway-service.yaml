@@ -63,9 +63,15 @@ spec:
                 configMapKeyRef:
                   name: cce-config
                   key: ALLOWED_ORIGINS
-            # ---- JWT (must match the Keycloak realm that issues tokens) ----
+            # ---- JWT (must match the issuer in tokens) ----
+            # External clients obtain tokens from the PUBLIC Keycloak URL, so the iss claim is
+            # the public issuer. Set per-environment in cce-config (KEYCLOAK_ISSUER); the gateway
+            # also fetches JWKS from this URL (resolved in-cluster via a hostAlias -> Traefik).
             - name: JWT_ISSUER
-              value: "http://keycloak:8080/auth/realms/cce"
+              valueFrom:
+                configMapKeyRef:
+                  name: cce-config
+                  key: KEYCLOAK_ISSUER
             - name: JWT_AUDIENCE
               value: "gateway-service"
             - name: JWT_ROLES_CLAIM_PATH
@@ -85,6 +91,16 @@ spec:
               value: "http://cce-compliance-service:8080"
             - name: SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_1_PREDICATES_0
               value: "Path=/v1/compliance/**"
+            - name: SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_1_FILTERS_0_NAME
+              value: "JwtValidationFilter"
+            - name: SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_ID
+              value: "cce-insights-service"
+            - name: SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_URI
+              value: "http://cce-insights-service:8084"
+            - name: SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_PREDICATES_0
+              value: "Path=/v1/insights/**"
+            - name: SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_FILTERS_0_NAME
+              value: "JwtValidationFilter"
             # ---- Keycloak (in-cluster) ----
             - name: KEYCLOAK_SERVER_URL
               value: "http://keycloak:8080/auth"

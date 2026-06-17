@@ -17,6 +17,9 @@ configMapGenerator:
       - KAFKA_UI_CLUSTER_NAME=cce-uat
       - OPENHIM_CORE_HOST=${OPENHIM_CORE_HOST}
       - KEYCLOAK_HOST=http://keycloak:8080/auth
+      # Public token issuer (gateway validates iss against this; external clients fetch
+      # tokens from the public Keycloak URL). Built from INGRESS_HOST at deploy time.
+      - KEYCLOAK_ISSUER=https://${INGRESS_HOST}/auth/realms/cce
       # ClickHouse (data-pipeline) — insights-service's datasource. The data-pipeline
       # runs as docker containers; CLICKHOUSE_HOST is the docker bridge gateway IP.
       - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}

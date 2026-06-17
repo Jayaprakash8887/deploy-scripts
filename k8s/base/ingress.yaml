@@ -27,13 +27,6 @@ spec:
                 name: cce-insights-ui
                 port:
                   number: 3001
-          - path: /v1/insights
-            pathType: Prefix
-            backend:
-              service:
-                name: cce-insights-service
-                port:
-                  number: 8084
           - path: /api/insights
             pathType: Prefix
             backend:
@@ -48,21 +41,16 @@ spec:
                 name: cce-collector-service
                 port:
                   number: 8080
-          # API gateway (JWT validation + routing to downstream services)
-          - path: /v1/events
+          # ALL /v1 API traffic goes through the gateway-service (JWT validation + DB-driven
+          # authorization), which routes to the backends: /v1/events -> collector,
+          # /v1/compliance -> compliance, /v1/insights -> insights-service.
+          - path: /v1
             pathType: Prefix
             backend:
               service:
                 name: gateway-service
                 port:
                   number: 8090
-          - path: /v1/compliance
-            pathType: Prefix
-            backend:
-              service:
-                name: cce-compliance-service
-                port:
-                  number: 8080
           - path: /inbound
             pathType: Prefix
             backend:

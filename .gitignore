@@ -8,4 +8,8 @@ k8s/**/*.rendered
 docs/
 remote-deployment/
 .vscode/
-.claude/
+.claude/__pycache__/
+*.pyc
+
+# RW-specific deployment scripts/data — not for the shared repo
+rw/

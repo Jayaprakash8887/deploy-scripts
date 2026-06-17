@@ -47,7 +47,13 @@ VALUES
     (2, 'HTTPBIN_WRITE',          'POST',   '/test/**',      'Post to httpbin.org test service',      'HttpBin'),
     (3, 'HTTPBIN_WRITE',          'PUT',    '/test/**',      'Update via httpbin.org test service',   'HttpBin'),
     (4, 'HTTPBIN_WRITE',          'DELETE', '/test/**',      'Delete via httpbin.org test service',   'HttpBin'),
-    (5, 'COLLECTOR_EVENTS_WRITE', 'POST',   '/v1/events/**', 'Post events to collector service',      'Collector')
+    (5, 'COLLECTOR_EVENTS_WRITE', 'POST',   '/v1/events/**',     'Post events to collector service',      'Collector'),
+    -- /v1/compliance and /v1/insights now sit behind the gateway too (JWT + authorization).
+    (6, 'COMPLIANCE_READ',        'GET',    '/v1/compliance/**', 'Read compliance resources',             'Compliance'),
+    (7, 'COMPLIANCE_WRITE',       'POST',   '/v1/compliance/**', 'Create compliance resources',           'Compliance'),
+    (8, 'COMPLIANCE_WRITE',       'PUT',    '/v1/compliance/**', 'Update compliance resources',           'Compliance'),
+    (9, 'COMPLIANCE_WRITE',       'DELETE', '/v1/compliance/**', 'Delete compliance resources',           'Compliance'),
+    (10, 'INSIGHTS_READ',         'GET',    '/v1/insights/**',   'Read analytics from insights service',  'Insights')
 ON CONFLICT (id) DO NOTHING;
 
 SELECT pg_catalog.setval('public.api_permissions_id_seq',

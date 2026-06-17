@@ -20,16 +20,15 @@ spec:
     # Allow traffic within same namespace
     - to:
         - podSelector: {}
-    # Allow DNS resolution
+    # DNS + reaching Traefik (kube-system) for in-cluster JWKS fetch.
+    # The gateway validates JWTs whose issuer is the public URL and fetches the JWKS via
+    # Traefik in-cluster (a hostAlias maps the public host to the Traefik ClusterIP). The
+    # LoadBalancer svc maps 443->8443 (and 80->8000), so the post-DNAT destination port is
+    # the pod's 8443/8000 — allow all ports to kube-system rather than chase the mapping.
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
     # Allow connections to host-installed Postgres and Kafka (via host IP and Docker bridge)
     # NOTE: Replace VM_HOST_CIDR with the actual VM IP/32 at deploy time
     - to:
