@@ -322,6 +322,12 @@ services:
       SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_ID: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_ID:-cce-compliance-service}
       SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_URI: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_URI:-http://cce-compliance-service:8080}
       SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_PREDICATES_0: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_PREDICATES_0:-Path=/v1/compliance/**}
+      # Insights service routes (JWT-validated, proxied from UI via Caddy → gateway → insights-service)
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_ID: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_ID:-cce-insights-service}
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_URI: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_URI:-http://cce-insights-service:8084}
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_PREDICATES_0: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_PREDICATES_0:-Path=/v1/insights/**}
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_FILTERS_0_NAME: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_FILTERS_0_NAME:-JwtValidationFilter}
+      INSIGHTS_SERVICE_URI: ${INSIGHTS_SERVICE_URI:-http://cce-insights-service:8084}
       # Keycloak
       KEYCLOAK_SERVER_URL: ${KEYCLOAK_SERVER_URL}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM}
@@ -332,16 +338,16 @@ services:
       # Authorization
       AUTHORIZATION_ENABLED: ${AUTHORIZATION_ENABLED}
       LOAD_PERMISSIONS_FROM_DATABASE_ON_STARTUP: ${LOAD_PERMISSIONS_FROM_DATABASE_ON_STARTUP}
+      # Flyway
+      SPRING_FLYWAY_TABLE: flyway_schema_history_gateway
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/actuator/health"]
       interval: 30s
       timeout: 5s
       start_period: 15s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 512M
     networks:
       - cce-net
   
@@ -408,6 +414,10 @@ services:
       # Actuator / Prometheus metrics
       MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus,metrics
       MANAGEMENT_METRICS_TAGS_APPLICATION: cce-collector-service
+      # Flyway
+      SPRING_FLYWAY_TABLE: flyway_schema_history_collector
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
     networks:
       - cce-net
 
@@ -441,7 +451,8 @@ services:
       DB_MAX_LIFETIME: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:-1800000}
       # Flyway (separate migration history from collector service)
       SPRING_FLYWAY_TABLE: flyway_schema_history_compliance
-      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "false"
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
       # Kafka
       KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
       KAFKA_CONCURRENCY: ${CCE_COMPLIANCE_KAFKA_CONCURRENCY:-5}
@@ -458,10 +469,6 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 1G
     networks:
       - cce-net
 
@@ -492,7 +499,8 @@ services:
       DB_POOL_MIN_IDLE: ${CCE_INTELLIGENCE_DB_POOL_MIN_IDLE:-5}
       # Flyway
       SPRING_FLYWAY_TABLE: flyway_schema_history_intelligence
-      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "false"
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
       # Kafka
       KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
       # Observability
@@ -504,10 +512,6 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 1G
     networks:
       - cce-net
 
@@ -559,20 +563,16 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 768M
     networks:
       - cce-net
 
-  gateway:
+  openmrs-gateway:
     image: openmrs/openmrs-reference-application-3-gateway:3.6.0
     container_name: openmrs-gateway
     restart: "unless-stopped"
     depends_on:
-      - frontend
-      - backend
+      - openmrs-frontend
+      - openmrs-backend
     ports:
       - "8096:80"
     deploy:
@@ -583,7 +583,7 @@ services:
     networks:
       - cce-net
 
-  frontend:
+  openmrs-frontend:
     image: openmrs/openmrs-reference-application-3-frontend:3.6.0
     container_name: openmrs-frontend
     restart: "unless-stopped"
@@ -611,33 +611,38 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost/"]
       timeout: 5s
     depends_on:
-      - backend
+      - openmrs-backend
     deploy:
       resources:
         limits:
           memory: 512m
           cpus: '0.5'
     networks:
-      - cce-net
+      cce-net:
+        aliases:
+          - frontend
 
-  backend:
+  openmrs-backend:
     image: openmrs/openmrs-reference-application-3-backend:3.6.0
     container_name: openmrs-backend
     restart: "unless-stopped"
     depends_on:
-      - db
+      - openmrs-db
     environment:
       OMRS_CONFIG_MODULE_WEB_ADMIN: "true"
       OMRS_CONFIG_AUTO_UPDATE_DATABASE: "true"
       OMRS_CONFIG_CREATE_TABLES: "true"
-      OMRS_CONFIG_CONNECTION_SERVER: db
+      OMRS_CONFIG_CONNECTION_SERVER: openmrs-db
       OMRS_CONFIG_CONNECTION_DATABASE: openmrs
       OMRS_CONFIG_CONNECTION_USERNAME: ${OMRS_DB_USER:-openmrs}
       OMRS_CONFIG_CONNECTION_PASSWORD: ${OMRS_DB_PASSWORD:-openmrs}
       JAVA_TOOL_OPTIONS: "-Xms512m -Xmx1536m -XX:+UseG1GC -XX:MaxMetaspaceSize=256m"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/openmrs"]
-      timeout: 5s
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 300s
     volumes:
       - openmrs-data:/openmrs/data
     deploy:
@@ -646,10 +651,12 @@ services:
           memory: 2g
           cpus: '2.00'
     networks:
-      - cce-net
+      cce-net:
+        aliases:
+          - backend
 
   # MariaDB
-  db:
+  openmrs-db:
     image: mariadb:10.11.7
     container_name: openmrs-db
     restart: "unless-stopped"
@@ -683,11 +690,11 @@ services:
     ports:
       - "8097:8080"
     depends_on:
-      backend:
+      openmrs-backend:
         condition: service_healthy
     environment:
-      OPENMRS_REST_BASE_URL: ${OPENMRS_REST_BASE_URL:-http://gateway:80/openmrs/ws/rest/v1}
-      OPENMRS_FHIR_BASE_URL: ${OPENMRS_FHIR_BASE_URL:-http://gateway:80/openmrs/ws/fhir2/R4}
+      OPENMRS_REST_BASE_URL: ${OPENMRS_REST_BASE_URL:-http://openmrs-gateway:80/openmrs/ws/rest/v1}
+      OPENMRS_FHIR_BASE_URL: ${OPENMRS_FHIR_BASE_URL:-http://openmrs-gateway:80/openmrs/ws/fhir2/R4}
       OPENMRS_REST_TIMEOUT: "30000"
       OPENMRS_FHIR_TIMEOUT: "30000"
       OPENMRS_AUTH_TYPE: basic
@@ -736,7 +743,7 @@ services:
         max-size: "50m"
         max-file: "3"
     depends_on:
-      backend:
+      openmrs-backend:
         condition: service_healthy
       openhim-core:
         condition: service_healthy
@@ -755,7 +762,7 @@ services:
       # root logger and stdout is silenced after the Spring Boot banner.
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-production}
       # OpenMRS — reached via the O3 gateway container on cce-net
-      OPENMRS_BASE_URL: ${OPENMRS_EMITTER_OPENMRS_BASE_URL:-http://gateway:80/openmrs}
+      OPENMRS_BASE_URL: ${OPENMRS_EMITTER_OPENMRS_BASE_URL:-http://openmrs-gateway:80/openmrs}
       OPENMRS_AUTH_USERNAME: ${OPENMRS_EMITTER_OPENMRS_AUTH_USERNAME:-${OPENMRS_USERNAME:-admin}}
       OPENMRS_AUTH_PASSWORD: ${OPENMRS_EMITTER_OPENMRS_AUTH_PASSWORD:-${OPENMRS_PASSWORD:-Admin123}}
       # OpenHIM — same core the openhim-cce-emitter-adaptor and receiver use
@@ -773,14 +780,12 @@ services:
     # No container healthcheck: Paketo image ships no shell or probe binary
     # (no /bin/sh, wget, or curl). Liveness/readiness are exposed via
     # http://<host>:8099/actuator/health and Prometheus.
-    deploy:
-      resources:
-        limits:
-          memory: 768M
     networks:
       - cce-net
 
   # ==================== Insights Service ====================
+  # Reads analytics data from ClickHouse (data-pipeline stack).
+  # Start the data-pipeline stack (cd data-pipeline && docker compose up -d) before this service.
   cce-insights-service:
     image: ${CCE_INSIGHTS_SERVICE_IMAGE:-cce-insights-service:latest}
     container_name: cce-insights-service
@@ -790,19 +795,19 @@ services:
       options:
         max-size: "50m"
         max-file: "3"
-    depends_on:
-      - postgres
     ports:
       - "9080:8084"
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
       SERVER_PORT: 8084
-      DB_HOST: ${POSTGRES_DB_HOST:-cce-postgres}
-      DB_PORT: ${POSTGRES_DB_PORT:-5432}
-      DB_NAME: ${POSTGRES_DB:-ccedb}
-      DB_USERNAME: ${POSTGRES_USER:-admin}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      # ClickHouse analytics backend (cce-clickhouse from data-pipeline stack)
+      DB_HOST: ${CH_HOST:-cce-clickhouse}
+      DB_PORT: ${CH_PORT:-8123}
+      DB_NAME: ${CH_DATABASE:-cce_analytics}
+      DB_USERNAME: ${CH_USER:-cce_pipeline}
+      DB_PASSWORD: ${CLICKHOUSE_PASSWORD:-cce_analytics_dev}
       DB_POOL_SIZE: ${INSIGHTS_DB_POOL_SIZE:-10}
+      CLICKHOUSE_USE_FINAL: ${CLICKHOUSE_USE_FINAL:-true}
       CACHE_TTL_LOOKUPS: ${CACHE_TTL_LOOKUPS:-60}
       CACHE_TTL_ANALYTICS: ${CACHE_TTL_ANALYTICS:-30}
       CACHE_TTL_METRICS: ${CACHE_TTL_METRICS:-15}
@@ -814,10 +819,6 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 1G
     networks:
       - cce-net
 
@@ -833,15 +834,23 @@ services:
         max-file: "3"
     ports:
       - "3001:3001"
+    environment:
+      # Runtime env injected into /srv/env-config.js by docker/entrypoint.sh at container start.
+      # These override the build-time VITE_ defaults baked into the image.
+      VITE_AUTH_ENABLED: ${UI_AUTH_ENABLED:-true}
+      VITE_KEYCLOAK_URL: ${UI_KEYCLOAK_URL:-https://keycloak.cce.mdtlabs.org}
+      VITE_KEYCLOAK_REALM: ${UI_KEYCLOAK_REALM:-cce}
+      VITE_KEYCLOAK_CLIENT_ID: ${UI_KEYCLOAK_CLIENT_ID:-cce-insights-ui}
+      VITE_API_BASE_URL: ${UI_API_BASE_URL:-}
+      VITE_POLLING_INTERVAL: ${UI_POLLING_INTERVAL:-60000}
+      VITE_DEFAULT_DATE_RANGE_DAYS: ${UI_DEFAULT_DATE_RANGE_DAYS:-30}
+    depends_on:
+      - gateway-service
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/"]
       interval: 30s
       timeout: 5s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 256M
     networks:
       - cce-net
 
