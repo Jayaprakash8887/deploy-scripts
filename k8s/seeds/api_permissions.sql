@@ -43,11 +43,17 @@ END $$;
 INSERT INTO public.api_permissions
     (id, permission_name, http_method, uri_pattern, description, resource_category)
 VALUES
-    (1, 'HTTPBIN_READ',           'GET',    '/test/**',      'Read from httpbin.org test service',    'HttpBin'),
-    (2, 'HTTPBIN_WRITE',          'POST',   '/test/**',      'Post to httpbin.org test service',      'HttpBin'),
-    (3, 'HTTPBIN_WRITE',          'PUT',    '/test/**',      'Update via httpbin.org test service',   'HttpBin'),
-    (4, 'HTTPBIN_WRITE',          'DELETE', '/test/**',      'Delete via httpbin.org test service',   'HttpBin'),
-    (5, 'COLLECTOR_EVENTS_WRITE', 'POST',   '/v1/events/**', 'Post events to collector service',      'Collector')
+    (1,  'HTTPBIN_READ',           'GET',    '/test/**',           'Read from httpbin.org test service',       'HttpBin'),
+    (2,  'HTTPBIN_WRITE',          'POST',   '/test/**',           'Post to httpbin.org test service',         'HttpBin'),
+    (3,  'HTTPBIN_WRITE',          'PUT',    '/test/**',           'Update via httpbin.org test service',      'HttpBin'),
+    (4,  'HTTPBIN_WRITE',          'DELETE', '/test/**',           'Delete via httpbin.org test service',      'HttpBin'),
+    (5,  'COLLECTOR_EVENTS_WRITE', 'POST',   '/v1/events/**',      'Post events to collector service',         'Collector'),
+    -- CCE Insights: all analytics/reporting endpoints are read-only GET.
+    -- INSIGHTS_READ is synced by the gateway to Keycloak as a smartcare realm role;
+    -- assign this role to any user who should access the insights dashboard.
+    (6,  'INSIGHTS_READ',          'GET',    '/v1/insights/**',    'Read CCE insights analytics data',         'Insights'),
+    -- Export endpoint uses POST to accept filter params in the request body.
+    (7,  'INSIGHTS_READ',          'POST',   '/v1/insights/exports/**', 'Export CCE insights data',            'Insights')
 ON CONFLICT (id) DO NOTHING;
 
 SELECT pg_catalog.setval('public.api_permissions_id_seq',

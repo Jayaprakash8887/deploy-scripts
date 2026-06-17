@@ -322,6 +322,12 @@ services:
       SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_ID: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_ID:-cce-compliance-service}
       SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_URI: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_URI:-http://cce-compliance-service:8080}
       SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_PREDICATES_0: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_2_PREDICATES_0:-Path=/v1/compliance/**}
+      # Insights service routes (JWT-validated, proxied from UI via Caddy → gateway → insights-service)
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_ID: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_ID:-cce-insights-service}
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_URI: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_URI:-http://cce-insights-service:8084}
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_PREDICATES_0: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_PREDICATES_0:-Path=/v1/insights/**}
+      SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_FILTERS_0_NAME: ${SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_ROUTES_3_FILTERS_0_NAME:-JwtValidationFilter}
+      INSIGHTS_SERVICE_URI: ${INSIGHTS_SERVICE_URI:-http://cce-insights-service:8084}
       # Keycloak
       KEYCLOAK_SERVER_URL: ${KEYCLOAK_SERVER_URL}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM}
@@ -828,6 +834,18 @@ services:
         max-file: "3"
     ports:
       - "3001:3001"
+    environment:
+      # Runtime env injected into /srv/env-config.js by docker/entrypoint.sh at container start.
+      # These override the build-time VITE_ defaults baked into the image.
+      VITE_AUTH_ENABLED: ${UI_AUTH_ENABLED:-true}
+      VITE_KEYCLOAK_URL: ${UI_KEYCLOAK_URL:-https://keycloak.cce.mdtlabs.org}
+      VITE_KEYCLOAK_REALM: ${UI_KEYCLOAK_REALM:-cce}
+      VITE_KEYCLOAK_CLIENT_ID: ${UI_KEYCLOAK_CLIENT_ID:-cce-insights-ui}
+      VITE_API_BASE_URL: ${UI_API_BASE_URL:-}
+      VITE_POLLING_INTERVAL: ${UI_POLLING_INTERVAL:-60000}
+      VITE_DEFAULT_DATE_RANGE_DAYS: ${UI_DEFAULT_DATE_RANGE_DAYS:-30}
+    depends_on:
+      - gateway-service
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/"]
       interval: 30s
