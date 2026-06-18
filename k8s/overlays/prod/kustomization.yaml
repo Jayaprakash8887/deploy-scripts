@@ -16,12 +16,23 @@ configMapGenerator:
       - KAFKA_BOOTSTRAP_SERVERS=${VM_HOST_IP}:9092
       - KAFKA_UI_CLUSTER_NAME=cce-prod
       - OPENHIM_CORE_HOST=${OPENHIM_CORE_HOST}
-      - KEYCLOAK_HOST=
+      - KEYCLOAK_HOST=http://keycloak:8080/auth
+      # Public token issuer (gateway validates iss against this). Built from INGRESS_HOST.
+      - KEYCLOAK_ISSUER=https://${INGRESS_HOST}/auth/realms/cce
+      # Grafana served under /grafana by the ingress (root_url + serve_from_sub_path).
+      - GRAFANA_ROOT_URL=https://${INGRESS_HOST}/grafana
+      # ClickHouse (data-pipeline) — insights-service's datasource. In PROD the pipeline
+      # runs natively on the host, so this is the host IP reachable from k3s pods.
+      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}
+      - CLICKHOUSE_PORT=8123
+      - CLICKHOUSE_DB=cce_analytics
+      # gateway-service CORS allowed origin. Concrete origin only, never "*".
+      - ALLOWED_ORIGINS=${GATEWAY_ALLOWED_ORIGINS}
 
 secretGenerator:
   - name: cce-secrets
-    # All values are injected from the gitignored .env.prod at deploy time (envsubst) —
-    # never hard-code credentials here.
+    # All values are injected from the gitignored .env.prod / Infisical at deploy time
+    # (envsubst) — never hard-code credentials here.
     literals:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -34,11 +45,13 @@ secretGenerator:
       - OPENHIM_PASSWORD=${OPENHIM_PASSWORD}
       - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
       - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
 
 generatorOptions:
   disableNameSuffixHash: true
 
-# PROD-specific patches — host-based routing and higher resources
+# PROD patches — pull :latest from GHCR + host-based TLS routing + higher resources.
 patches:
   - target:
       kind: Ingress
@@ -54,8 +67,11 @@ patches:
               - ${INGRESS_HOST}
   - target:
       kind: Deployment
-      name: cce-compliance-service
+      name: cce-collector-service
     patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/memory
         value: 512Mi
@@ -64,33 +80,84 @@ patches:
         value: 500m
   - target:
       kind: Deployment
-      name: cce-collector-service
+      name: cce-compliance-service
     patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/memory
         value: 512Mi
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/cpu
         value: 500m
+  - target:
+      kind: Deployment
+      name: cce-intelligence-service
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: Deployment
+      name: gateway-service
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: Deployment
+      name: cce-scheduler-service
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: Deployment
+      name: cce-emitter-adaptor
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: Deployment
+      name: cce-insights-service
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: Deployment
+      name: cce-insights-ui
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
 
 images:
   - name: ghcr.io/openphc/cce-collector-service
-    newName: ghcr.io/openphc/cce-collector-service:latest
+    newName: ghcr.io/openphc/cce-collector-service
     newTag: latest
   - name: ghcr.io/openphc/cce-compliance-service
-    newName: ghcr.io/openphc/cce-compliance-service:latest
+    newName: ghcr.io/openphc/cce-compliance-service
+    newTag: latest
+  - name: ghcr.io/openphc/cce-intelligence-service
+    newName: ghcr.io/openphc/cce-intelligence-service
+    newTag: latest
+  - name: ghcr.io/openphc/gateway-service
+    newName: ghcr.io/openphc/gateway-service
     newTag: latest
   - name: ghcr.io/openphc/openhim-cce-emitter-adaptor
-    newName: ghcr.io/openphc/openhim-cce-emitter-adaptor:latest
+    newName: ghcr.io/openphc/openhim-cce-emitter-adaptor
     newTag: latest
   - name: ghcr.io/openphc/cce-insights-service
-    newName: ghcr.io/openphc/cce-insights-service:latest
+    newName: ghcr.io/openphc/cce-insights-service
     newTag: latest
   - name: ghcr.io/openphc/cce-insights-ui
-    newName: ghcr.io/openphc/cce-insights-ui:latest
-    newTag: latest
+    newName: ghcr.io/openphc/cce-insights-ui
+    newTag: demo-rw-latest
   - name: ghcr.io/openphc/cce-scheduler-service
-    newName: ghcr.io/openphc/cce-scheduler-service:latest
+    newName: ghcr.io/openphc/cce-scheduler-service
     newTag: latest
 
 commonLabels:

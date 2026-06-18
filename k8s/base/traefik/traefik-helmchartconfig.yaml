@@ -39,7 +39,9 @@ spec:
       initContainers:
         - name: volume-permissions
           image: busybox:1.36
-          command: ["sh", "-c", "touch /data/acme.json /data/acme-staging.json && chmod -v 600 /data/acme.json /data/acme-staging.json"]
+          # Traefik runs as uid 65532; it must OWN acme.json (mode 600) or it skips the ACME
+          # resolver with "permission denied". touch as root, chown to traefik, then chmod 600.
+          command: ["sh", "-c", "touch /data/acme.json /data/acme-staging.json && chown 65532:65532 /data/acme.json /data/acme-staging.json && chmod -v 600 /data/acme.json /data/acme-staging.json"]
           securityContext:
             runAsNonRoot: false
             runAsUser: 0
@@ -48,8 +50,10 @@ spec:
               mountPath: /data
     # Stable CLI args (work across Traefik v2/v3 regardless of bundled chart version).
     additionalArguments:
-      # Global HTTP(:web) -> HTTPS(:websecure) redirect, like Caddy.
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      # Global HTTP(:web) -> HTTPS redirect, like Caddy. Target the EXTERNAL port :443
+      # explicitly: the websecure entrypoint listens on :8443 internally, so redirecting
+      # "to=websecure" would emit a broken https://host:8443 Location to external clients.
+      - "--entrypoints.web.http.redirections.entrypoint.to=:443"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
       # Production Let's Encrypt resolver "le" (TLS-ALPN-01 over :443, unaffected by the redirect).
