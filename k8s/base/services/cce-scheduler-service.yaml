@@ -4,6 +4,13 @@ metadata:
   name: cce-scheduler-service
 spec:
   replicas: 1
+  # Leader-elected (partitioned advisory locks): a surge pod would be a partition-less standby
+  # whose aggregate health is DOWN. maxSurge=0/maxUnavailable=1 rolls in place (no standby).
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: cce-scheduler-service
@@ -93,15 +100,17 @@ spec:
             limits:
               memory: 768Mi
               cpu: 500m
+          # Dedicated probe endpoints — the aggregate /actuator/health returns 503 on a standby
+          # (leadership indicator DOWN), which would crashloop non-leader pods.
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/liveness
               port: 8083
             initialDelaySeconds: 60
             periodSeconds: 15
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8083
             initialDelaySeconds: 30
             periodSeconds: 10
