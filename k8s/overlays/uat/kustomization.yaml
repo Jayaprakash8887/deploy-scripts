@@ -112,7 +112,7 @@ patches:
         value: Always
   - target:
       kind: Deployment
-      name: cce-emitter-adaptor
+      name: openhim-emitter-adaptor
     patch: |
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
