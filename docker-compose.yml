@@ -269,7 +269,7 @@ services:
       # Data-pipeline: ClickHouse datasource plugin + credentials for the provisioned datasources
       GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?set CLICKHOUSE_PASSWORD in .env}
-      CDC_PASSWORD: ${CDC_PASSWORD:?set CDC_PASSWORD in .env}
+      POSTGRES_READ_ONLY_PASSWORD: ${POSTGRES_READ_ONLY_PASSWORD:?set POSTGRES_READ_ONLY_PASSWORD in .env}
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
