@@ -6,8 +6,8 @@
 
     "database.hostname": "${POSTGRES_HOST}",
     "database.port": "${POSTGRES_PORT}",
-    "database.user": "${READ_ONLY_USER}",
-    "database.password": "${READ_ONLY_PASSWORD}",
+    "database.user": "${POSTGRES_READ_ONLY_USER}",
+    "database.password": "${POSTGRES_READ_ONLY_PASSWORD}",
     "database.dbname": "${POSTGRES_DATABASE}",
 
     "topic.prefix": "cce",
