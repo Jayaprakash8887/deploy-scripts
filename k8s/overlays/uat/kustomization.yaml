@@ -169,7 +169,7 @@ images:
     newTag: latest
   - name: ghcr.io/openphc/cce-insights-service
     newName: ghcr.io/openphc/cce-insights-service
-    newTag: latest
+    newTag: demo-rw-latest
   - name: ghcr.io/openphc/cce-insights-ui
     newName: ghcr.io/openphc/cce-insights-ui
     newTag: demo-rw-latest
