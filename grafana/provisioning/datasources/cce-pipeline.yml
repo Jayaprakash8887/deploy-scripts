@@ -26,5 +26,5 @@ datasources:
     jsonData:
       sslmode: disable
     secureJsonData:
-      password: ${CDC_PASSWORD}
+      password: ${READ_ONLY_PASSWORD}
     editable: true
