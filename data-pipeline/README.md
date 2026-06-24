@@ -39,7 +39,7 @@ docker compose up -d
 for f in schema/0*.sql; do clickhouse-client --database cce_analytics --multiquery < "$f"; done
 
 # 2. Configure logical replication on the source ccedb (publication + REPLICA IDENTITY FULL)
-psql -h "$CDC_PG_HOST" -U postgres -d "$CDC_PG_DATABASE" -f cdc/01-configure-replication.sql
+psql -h "$POSTGRES_HOST" -U postgres -d "$POSTGRES_DATABASE" -f cdc/01-configure-replication.sql
 
 # 3. Register the Debezium connector on Kafka Connect (starts the initial snapshot)
 ./scripts/register-connectors.sh

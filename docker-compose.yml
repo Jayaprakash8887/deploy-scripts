@@ -269,7 +269,7 @@ services:
       # Data-pipeline: ClickHouse datasource plugin + credentials for the provisioned datasources
       GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?set CLICKHOUSE_PASSWORD in .env}
-      CDC_PASSWORD: ${CDC_PASSWORD:?set CDC_PASSWORD in .env}
+      POSTGRES_READ_ONLY_PASSWORD: ${POSTGRES_READ_ONLY_PASSWORD:?set POSTGRES_READ_ONLY_PASSWORD in .env}
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
@@ -803,10 +803,10 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
       SERVER_PORT: 8084
       # ClickHouse analytics backend (cce-clickhouse from data-pipeline stack)
-      DB_HOST: ${CH_HOST:-cce-clickhouse}
-      DB_PORT: ${CH_PORT:-8123}
-      DB_NAME: ${CH_DATABASE:-cce_analytics}
-      DB_USERNAME: ${CH_USER:-cce_pipeline}
+      DB_HOST: ${CLICKHOUSE_HOST:-cce-clickhouse}
+      DB_PORT: ${CLICKHOUSE_PORT:-8123}
+      DB_NAME: ${CLICKHOUSE_DB:-cce_analytics}
+      DB_USERNAME: ${CLICKHOUSE_USER:-cce_pipeline}
       DB_PASSWORD: ${CLICKHOUSE_PASSWORD:-cce_analytics_dev}
       DB_POOL_SIZE: ${INSIGHTS_DB_POOL_SIZE:-10}
       CLICKHOUSE_USE_FINAL: ${CLICKHOUSE_USE_FINAL:-true}
