@@ -19,12 +19,12 @@
 --                                        (active_facilities / inactive_facilities / active_facility_rate_pct)
 --                                        Facilities page header cards
 --                                        (single row per day; DEPENDS ON mv_daily_facility_kpis_mv)
---                                        Requires: facility_reference (schema/08)
+--                                        Requires: facility (schema/08)
 --
 --   mv_daily_adoption_kpis             → e-Buzima adoption indicator (per facility, per day)
 --                                        actual patients vs expected patients per day × 100
 --                                        (reporting_gap = expected − actual)
---                                        Requires: facility_reference (schema/08)
+--                                        Requires: facility (schema/08)
 --
 --   mv_daily_deviation_kpis            → Deviations page header cards
 --                                        (total / overdue / missed / order violation per protocol)
@@ -81,7 +81,7 @@
 --   SYSTEM REFRESH VIEW mv_daily_adoption_kpis_mv;
 --
 -- Prerequisites: schema/06 rollup tables must be populated.
---                schema/08 (facility_reference) must exist and contain at least one row.
+--                schema/08 (facility) must exist and contain at least one row.
 
 USE cce_analytics;
 
@@ -374,7 +374,7 @@ WHERE cbf.facility_id != '';           -- exclude unattributed patients
 -- Covers: Dashboard facility activity cards, Facilities page header cards.
 --
 -- Replaces the old compliance-tier bucket cards (>90 / 75-90 / <75) with:
---   total_in_scope           → row count of facility_reference (all rows = all in-scope facilities)
+--   total_in_scope           → row count of facility (all rows = all in-scope facilities)
 --   active_facilities        → in-scope facilities that transmitted ≥1 HIE event today
 --                              (event_count > 0 in mv_daily_facility_kpis for this snapshot_date)
 --   inactive_facilities      → facilities in reference list but no events today
@@ -386,7 +386,7 @@ WHERE cbf.facility_id != '';           -- exclude unattributed patients
 --   For reporting-period-aware queries (e.g. date range from UI) the backend service
 --   should query mv_event_volume_hourly directly with the desired date filter.
 --
--- Requires: facility_reference (schema/08) populated.
+-- Requires: facility (schema/08) populated.
 -- DEPENDS ON mv_daily_facility_kpis_mv: runs after facility KPIs are refreshed.
 
 CREATE TABLE IF NOT EXISTS mv_daily_facility_activity_summary
@@ -413,7 +413,11 @@ SELECT
     coalesce(toFloat32(round(
         countIf(fk.event_count > 0) / nullIf(count(), 0) * 100, 1
     )), 0.0)                                                                          AS active_facility_rate_pct
-FROM facility_reference AS fr FINAL
+FROM (
+    SELECT facility_id
+    FROM cce_analytics.facility
+    WHERE _is_deleted = 0
+) AS fr
 LEFT JOIN mv_daily_facility_kpis fk
        ON fr.facility_id = fk.facility_id
       AND fk.snapshot_date = toDate(now());   -- join only today's facility kpis rows
@@ -540,12 +544,12 @@ SELECT
 -- Metrics (per facility per day):
 --   actual_patients          → unique patients whose events reached the HIE on snapshot_date
 --                              (uniqMerge from mv_facility_summary for that day)
---   expected_patients_per_day → static validated baseline from facility_reference
+--   expected_patients_per_day → static validated baseline from facility
 --   adoption_rate_pct        → actual / expected × 100
 --   reporting_gap            → expected − actual
 --                              positive = under-reporting; negative = over-reporting
 --
--- Requires: facility_reference (schema/08) with expected_patients_per_day populated.
+-- Requires: facility (schema/08) with expected_patients_per_day populated.
 -- Does NOT depend on mv_daily_facility_kpis — reads mv_facility_summary directly.
 --
 -- For multi-day reporting periods (date range from UI) the backend service should:
@@ -563,7 +567,7 @@ CREATE TABLE IF NOT EXISTS mv_daily_adoption_kpis
     refreshed_at               DateTime64(3),
     facility_id                String,
     facility_name              String,
-    expected_patients_per_day  UInt32,        -- from facility_reference (static baseline)
+    expected_patients_per_day  UInt32,        -- from facility (static baseline)
     actual_patients            UInt32,        -- unique patients with events on snapshot_date
     adoption_rate_pct          Float32,       -- actual / expected × 100
     reporting_gap              Int64          -- expected − actual (positive = under-reporting)
@@ -574,31 +578,27 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS mv_daily_adoption_kpis_mv
 REFRESH EVERY 30 MINUTE APPEND
 TO mv_daily_adoption_kpis
 AS
-WITH
-actual_today AS (
-    -- Unique patients per facility today from the pre-aggregated facility summary.
-    -- uniqMerge reads the AggregateFunction(uniq, String) partial states stored in the MV.
-    SELECT
-        facility_id,
-        toUInt32(uniqMerge(unique_patients)) AS actual_patients
-    FROM mv_facility_summary
-    WHERE toDate(day) = toDate(now())
-      AND facility_id != ''
-    GROUP BY facility_id
-)
 SELECT
     toDate(now())                                                                          AS snapshot_date,
     now64(3)                                                                               AS refreshed_at,
     fr.facility_id,
     fr.facility_name,
     fr.expected_patients_per_day,
-    coalesce(at.actual_patients, 0)                                                        AS actual_patients,
+    toUInt32(uniq(iel.subject))                                                            AS actual_patients,
     coalesce(toFloat32(round(
-        coalesce(at.actual_patients, 0) / nullIf(fr.expected_patients_per_day, 0) * 100, 1
+        toUInt32(uniq(iel.subject)) / nullIf(toFloat64(fr.expected_patients_per_day), 0) * 100, 1
     )), 0.0)                                                                               AS adoption_rate_pct,
-    toInt64(fr.expected_patients_per_day) - toInt64(coalesce(at.actual_patients, 0))      AS reporting_gap
-FROM facility_reference AS fr FINAL
-LEFT JOIN actual_today at ON fr.facility_id = at.facility_id;
+    toInt64(fr.expected_patients_per_day) - toInt64(toUInt32(uniq(iel.subject)))          AS reporting_gap
+FROM (
+    SELECT facility_id, facility_name, expected_patients_per_day
+    FROM cce_analytics.facility
+    WHERE _is_deleted = 0
+) AS fr
+LEFT JOIN cce_analytics.inbound_event_logs AS iel
+       ON iel.facility_id = fr.facility_id
+      AND toDate(iel.received_at) = toDate(now())
+      AND iel.status = 'ACCEPTED'
+GROUP BY fr.facility_id, fr.facility_name, fr.expected_patients_per_day;
 
 
 -- ============================================================
