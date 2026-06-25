@@ -566,13 +566,15 @@ CREATE TABLE IF NOT EXISTS mv_daily_adoption_kpis
     snapshot_date              Date,
     refreshed_at               DateTime64(3),
     facility_id                String,
-    facility_name              String,
     expected_patients_per_day  UInt32,        -- from facility (static baseline)
     actual_patients            UInt32,        -- unique patients with events on snapshot_date
     adoption_rate_pct          Float32,       -- actual / expected × 100
     reporting_gap              Int64          -- expected − actual (positive = under-reporting)
 ) ENGINE = ReplacingMergeTree(refreshed_at)
 ORDER BY (snapshot_date, facility_id);
+-- facility_name is intentionally NOT stored — resolved at query time from the facility table.
+-- Storing it caused duplicate rows when the name changed between 30-min refreshes
+-- (GROUP BY facility_id, facility_name produced two groups for the same facility_id).
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS mv_daily_adoption_kpis_mv
 REFRESH EVERY 30 MINUTE APPEND
@@ -582,7 +584,6 @@ SELECT
     toDate(now())                                                                          AS snapshot_date,
     now64(3)                                                                               AS refreshed_at,
     fr.facility_id,
-    fr.facility_name,
     fr.expected_patients_per_day,
     toUInt32(uniq(iel.subject))                                                            AS actual_patients,
     coalesce(toFloat32(round(
@@ -590,7 +591,7 @@ SELECT
     )), 0.0)                                                                               AS adoption_rate_pct,
     toInt64(fr.expected_patients_per_day) - toInt64(toUInt32(uniq(iel.subject)))          AS reporting_gap
 FROM (
-    SELECT facility_id, facility_name, expected_patients_per_day
+    SELECT facility_id, expected_patients_per_day
     FROM cce_analytics.facility
     WHERE _is_deleted = 0
 ) AS fr
@@ -598,7 +599,7 @@ LEFT JOIN cce_analytics.inbound_event_logs AS iel
        ON iel.facility_id = fr.facility_id
       AND toDate(iel.received_at) = toDate(now())
       AND iel.status = 'ACCEPTED'
-GROUP BY fr.facility_id, fr.facility_name, fr.expected_patients_per_day;
+GROUP BY fr.facility_id, fr.expected_patients_per_day;
 
 
 -- ============================================================
@@ -624,11 +625,12 @@ GROUP BY fr.facility_id, fr.facility_name, fr.expected_patients_per_day;
 --   ORDER BY compliance_rate_pct DESC LIMIT 3;
 --
 -- DASHBOARD — e-Buzima adoption overview today (worst under-reporters first):
---   SELECT facility_id, facility_name, expected_patients_per_day, actual_patients,
---          adoption_rate_pct, reporting_gap
---   FROM mv_daily_adoption_kpis FINAL
---   WHERE snapshot_date = today()
---   ORDER BY reporting_gap DESC;
+--   SELECT a.facility_id, f.facility_name, a.expected_patients_per_day, a.actual_patients,
+--          a.adoption_rate_pct, a.reporting_gap
+--   FROM mv_daily_adoption_kpis a FINAL
+--   LEFT JOIN facility f FINAL ON f.facility_id = a.facility_id
+--   WHERE a.snapshot_date = today()
+--   ORDER BY a.reporting_gap DESC;
 --
 -- TREND — compliance rate over last 30 days (daily snapshots):
 --   SELECT snapshot_date,
@@ -641,11 +643,12 @@ GROUP BY fr.facility_id, fr.facility_name, fr.expected_patients_per_day;
 --   ORDER BY snapshot_date;
 --
 -- TREND — adoption rate over a reporting period (multi-day):
---   SELECT snapshot_date, facility_id, facility_name,
---          actual_patients, expected_patients_per_day, adoption_rate_pct
---   FROM mv_daily_adoption_kpis FINAL
---   WHERE snapshot_date BETWEEN '2026-01-01' AND '2026-06-22'
---   ORDER BY snapshot_date, facility_id;
+--   SELECT a.snapshot_date, a.facility_id, f.facility_name,
+--          a.actual_patients, a.expected_patients_per_day, a.adoption_rate_pct
+--   FROM mv_daily_adoption_kpis a FINAL
+--   LEFT JOIN facility f FINAL ON f.facility_id = a.facility_id
+--   WHERE a.snapshot_date BETWEEN '2026-01-01' AND '2026-06-22'
+--   ORDER BY a.snapshot_date, a.facility_id;
 --
 -- COMPLIANCE PAGE — per-protocol summary (today):
 --   SELECT protocol_definition_id,
@@ -666,11 +669,12 @@ GROUP BY fr.facility_id, fr.facility_name, fr.expected_patients_per_day;
 --   ORDER BY compliance_rate_pct DESC;
 --
 -- FACILITIES PAGE — adoption table (today):
---   SELECT facility_id, facility_name, expected_patients_per_day, actual_patients,
---          adoption_rate_pct, reporting_gap
---   FROM mv_daily_adoption_kpis FINAL
---   WHERE snapshot_date = today()
---   ORDER BY adoption_rate_pct DESC;
+--   SELECT a.facility_id, f.facility_name, a.expected_patients_per_day, a.actual_patients,
+--          a.adoption_rate_pct, a.reporting_gap
+--   FROM mv_daily_adoption_kpis a FINAL
+--   LEFT JOIN facility f FINAL ON f.facility_id = a.facility_id
+--   WHERE a.snapshot_date = today()
+--   ORDER BY a.adoption_rate_pct DESC;
 --
 -- DEVIATIONS PAGE — header cards (today):
 --   SELECT sum(total_deviations), sum(overdue_count), sum(missed_count), sum(order_violation_count)
