@@ -153,7 +153,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(cce_events_matched_total{job=\"cce-scheduler-service\",status=\"matched\"}[5m]) / rate(cce_events_processed_total{job=\"cce-scheduler-service\"}[5m]) * 100",
+          "expr": "cce_events_matched_total{job=\"cce-scheduler-service\",status=\"matched\"} / ignoring(status) cce_events_processed_total{job=\"cce-scheduler-service\"} * 100",
           "legendFormat": "Match %",
           "refId": "A"
         }
@@ -362,7 +362,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "expr": "up{job=\"cce-scheduler-service\"}",
-          "legendFormat": "Compliance Service",
+          "legendFormat": "Scheduler Service",
           "refId": "A"
         }
       ]
@@ -609,27 +609,9 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "histogram_quantile(0.50, rate(cce_step_matching_duration_seconds_bucket{job=\"cce-scheduler-service\"}[5m]))",
-          "legendFormat": "p50",
+          "expr": "rate(cce_step_matching_duration_seconds_sum{job=\"cce-scheduler-service\"}[5m]) / rate(cce_step_matching_duration_seconds_count{job=\"cce-scheduler-service\"}[5m])",
+          "legendFormat": "avg duration",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "histogram_quantile(0.95, rate(cce_step_matching_duration_seconds_bucket{job=\"cce-scheduler-service\"}[5m]))",
-          "legendFormat": "p95",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "histogram_quantile(0.99, rate(cce_step_matching_duration_seconds_bucket{job=\"cce-scheduler-service\"}[5m]))",
-          "legendFormat": "p99",
-          "refId": "C"
         }
       ]
     },
@@ -717,27 +699,9 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "histogram_quantile(0.50, rate(cce_events_processing_duration_seconds_bucket{job=\"cce-scheduler-service\"}[5m]))",
-          "legendFormat": "p50",
+          "expr": "rate(cce_events_processing_duration_seconds_sum{job=\"cce-scheduler-service\"}[5m]) / rate(cce_events_processing_duration_seconds_count{job=\"cce-scheduler-service\"}[5m])",
+          "legendFormat": "avg duration",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "histogram_quantile(0.95, rate(cce_events_processing_duration_seconds_bucket{job=\"cce-scheduler-service\"}[5m]))",
-          "legendFormat": "p95",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "histogram_quantile(0.99, rate(cce_events_processing_duration_seconds_bucket{job=\"cce-scheduler-service\"}[5m]))",
-          "legendFormat": "p99",
-          "refId": "C"
         }
       ]
     },
@@ -927,7 +891,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "kafka_consumer_fetch_manager_records_lag{job=\"cce-scheduler-service\"}",
+          "expr": "kafka_consumer_records_lag_max{job=\"cce-scheduler-service\"}",
           "legendFormat": "{{topic}}-{{partition}}",
           "refId": "A"
         }

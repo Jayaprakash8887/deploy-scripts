@@ -15,7 +15,7 @@ scrape_configs:
     static_configs:
       - targets: ["cce-collector-service:8080"]
 
-  - job_name: "openhim-cce-emmitter-adaptor"
+  - job_name: "openhim-emitter-adaptor"
     metrics_path: /actuator/prometheus
     static_configs:
       - targets: ["openhim-cce-emmitter-adaptor:8082"]
