@@ -23,295 +23,171 @@
   "panels": [
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
       "id": 100,
       "title": "Overview",
       "type": "row"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
+          "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
+            "steps": [{ "color": "green", "value": null }]
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 6,
-        "w": 5,
-        "x": 0,
-        "y": 1
-      },
+      "gridPos": { "h": 6, "w": 5, "x": 0, "y": 1 },
       "id": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "textMode": "auto"
       },
-      "title": "Events Processed Rate",
+      "title": "Triggers Received Rate",
       "type": "stat",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "rate(cce_events_processed_total{job=\"cce-intelligence-service\"}[5m])",
-          "legendFormat": "processed/s",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(cce_intelligence_triggers_received_total{job=\"cce-intelligence-service\"}[5m])",
+          "legendFormat": "triggers/s",
           "refId": "A"
         }
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
+          "color": { "mode": "thresholds" },
           "max": 100,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 60
-              },
-              {
-                "color": "green",
-                "value": 80
-              }
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 60 },
+              { "color": "green", "value": 80 }
             ]
           },
           "unit": "percent"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 6,
-        "w": 5,
-        "x": 5,
-        "y": 1
-      },
+      "gridPos": { "h": 6, "w": 5, "x": 5, "y": 1 },
       "id": 2,
       "options": {
         "minVizHeight": 75,
         "minVizWidth": 75,
         "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "title": "Match Rate",
+      "title": "Delivery Success Rate",
       "type": "gauge",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "rate(cce_events_matched_total{job=\"cce-intelligence-service\",status=\"matched\"}[5m]) / rate(cce_events_processed_total{job=\"cce-intelligence-service\"}[5m]) * 100",
-          "legendFormat": "Match %",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "sum(cce_intelligence_deliveries_delivered_total{job=\"cce-intelligence-service\"}) / sum(cce_intelligence_deliveries_dispatched_total{job=\"cce-intelligence-service\"}) * 100",
+          "legendFormat": "Success %",
           "refId": "A"
         }
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
+          "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 5
-              },
-              {
-                "color": "red",
-                "value": 20
-              }
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 5 },
+              { "color": "red", "value": 20 }
             ]
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 6,
-        "w": 5,
-        "x": 10,
-        "y": 1
-      },
+      "gridPos": { "h": 6, "w": 5, "x": 10, "y": 1 },
       "id": 3,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "textMode": "auto"
       },
-      "title": "Active Protocol Instances",
+      "title": "Active Destinations",
       "type": "stat",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "cce_protocol_instances_active{job=\"cce-intelligence-service\"}",
-          "legendFormat": "active",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "cce_intelligence_destinations_active{job=\"cce-intelligence-service\"}",
+          "legendFormat": "destinations",
           "refId": "A"
         }
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
+          "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 5
-              }
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 5 }
             ]
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 15,
-        "y": 1
-      },
+      "gridPos": { "h": 6, "w": 4, "x": 15, "y": 1 },
       "id": 4,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "textMode": "auto"
       },
       "title": "Consumer Errors / min",
       "type": "stat",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "increase(cce_consumer_inbound_errors_total{job=\"cce-intelligence-service\"}[1m]) + increase(cce_consumer_scheduler_errors_total{job=\"cce-intelligence-service\"}[1m])",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cce_intelligence_consumer_errors_total{job=\"cce-intelligence-service\"}[1m])",
           "legendFormat": "errors",
           "refId": "A"
         }
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
+          "color": { "mode": "thresholds" },
           "mappings": [
             {
               "options": {
-                "0": {
-                  "color": "red",
-                  "text": "DOWN"
-                },
-                "1": {
-                  "color": "green",
-                  "text": "UP"
-                }
+                "0": { "color": "red", "text": "DOWN" },
+                "1": { "color": "green", "text": "UP" }
               },
               "type": "value"
             }
@@ -319,76 +195,46 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
             ]
           }
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 6,
-        "w": 5,
-        "x": 19,
-        "y": 1
-      },
+      "gridPos": { "h": 6, "w": 5, "x": 19, "y": 1 },
       "id": 5,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "textMode": "auto"
       },
       "title": "Service Status",
       "type": "stat",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "up{job=\"cce-intelligence-service\"}",
-          "legendFormat": "Compliance Service",
+          "legendFormat": "Intelligence Service",
           "refId": "A"
         }
       ]
     },
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 7
-      },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
       "id": 101,
-      "title": "Event Processing",
+      "title": "Delivery Performance",
       "type": "row"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -400,141 +246,69 @@
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
+            "scaleDistribution": { "type": "linear" },
             "showPoints": "auto",
             "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            }
+            "stacking": { "group": "A", "mode": "normal" }
           },
           "unit": "short"
         },
         "overrides": [
           {
-            "matcher": {
-              "id": "byName",
-              "options": "Matched"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
+            "matcher": { "id": "byName", "options": "Dispatched" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }]
           },
           {
-            "matcher": {
-              "id": "byName",
-              "options": "Zero Match"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "orange",
-                  "mode": "fixed"
-                }
-              }
-            ]
+            "matcher": { "id": "byName", "options": "Delivered" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
           },
           {
-            "matcher": {
-              "id": "byName",
-              "options": "Duplicate"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
+            "matcher": { "id": "byName", "options": "Failed" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
           }
         ]
       },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 8
-      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
       "id": 6,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
-      "title": "Event Throughput",
+      "title": "Delivery Throughput",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "increase(cce_events_matched_total{job=\"cce-intelligence-service\",status=\"matched\"}[1m])",
-          "legendFormat": "Matched",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cce_intelligence_deliveries_dispatched_total{job=\"cce-intelligence-service\"}[1m])",
+          "legendFormat": "Dispatched",
           "refId": "A"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "increase(cce_events_zero_match_total{job=\"cce-intelligence-service\"}[1m])",
-          "legendFormat": "Zero Match",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cce_intelligence_deliveries_delivered_total{job=\"cce-intelligence-service\"}[1m])",
+          "legendFormat": "Delivered",
           "refId": "B"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "increase(cce_events_duplicate_total{job=\"cce-intelligence-service\"}[1m])",
-          "legendFormat": "Duplicate",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cce_intelligence_deliveries_failed_total{job=\"cce-intelligence-service\"}[1m])",
+          "legendFormat": "Failed",
           "refId": "C"
         }
       ]
     },
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 16
-      },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 },
       "id": 102,
-      "title": "Matching Performance",
+      "title": "Webhook Performance",
       "type": "row"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -546,223 +320,95 @@
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
+            "scaleDistribution": { "type": "linear" },
             "showPoints": "auto",
             "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "line"
-            }
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "line" }
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 0.2
-              },
-              {
-                "color": "red",
-                "value": 0.5
-              }
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 2 },
+              { "color": "red", "value": 5 }
             ]
           },
           "unit": "s"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 17
-      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
       "id": 7,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
-      "title": "Step Matching Duration (Tier 1 + Tier 2)",
+      "title": "Webhook Delivery Duration",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "histogram_quantile(0.50, rate(cce_step_matching_duration_seconds_bucket{job=\"cce-intelligence-service\"}[5m]))",
-          "legendFormat": "p50",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(cce_intelligence_webhook_duration_seconds_sum{job=\"cce-intelligence-service\"}[5m]) / rate(cce_intelligence_webhook_duration_seconds_count{job=\"cce-intelligence-service\"}[5m])",
+          "legendFormat": "avg duration - {{adaptor_name}}",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "histogram_quantile(0.95, rate(cce_step_matching_duration_seconds_bucket{job=\"cce-intelligence-service\"}[5m]))",
-          "legendFormat": "p95",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "histogram_quantile(0.99, rate(cce_step_matching_duration_seconds_bucket{job=\"cce-intelligence-service\"}[5m]))",
-          "legendFormat": "p99",
-          "refId": "C"
         }
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "seconds",
-            "drawStyle": "line",
-            "fillOpacity": 10,
+            "axisLabel": "triggers",
+            "drawStyle": "bars",
+            "fillOpacity": 60,
             "gradientMode": "none",
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
+            "scaleDistribution": { "type": "linear" },
             "showPoints": "auto",
             "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "line"
-            }
+            "stacking": { "group": "A", "mode": "normal" }
           },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 0.5
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "s"
+          "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 17
-      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
       "id": 8,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
-      "title": "Event Processing Duration",
+      "title": "Triggers Received by Type",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "histogram_quantile(0.50, rate(cce_events_processing_duration_seconds_bucket{job=\"cce-intelligence-service\"}[5m]))",
-          "legendFormat": "p50",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cce_intelligence_triggers_received_total{job=\"cce-intelligence-service\"}[1m])",
+          "legendFormat": "{{trigger_type}}",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "histogram_quantile(0.95, rate(cce_events_processing_duration_seconds_bucket{job=\"cce-intelligence-service\"}[5m]))",
-          "legendFormat": "p95",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "histogram_quantile(0.99, rate(cce_events_processing_duration_seconds_bucket{job=\"cce-intelligence-service\"}[5m]))",
-          "legendFormat": "p99",
-          "refId": "C"
         }
       ]
     },
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 25
-      },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
       "id": 103,
       "title": "Consumer Errors",
       "type": "row"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -774,105 +420,42 @@
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
+            "scaleDistribution": { "type": "linear" },
             "showPoints": "auto",
             "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            }
+            "stacking": { "group": "A", "mode": "normal" }
           },
           "unit": "short"
         },
         "overrides": [
           {
-            "matcher": {
-              "id": "byName",
-              "options": "Inbound Consumer"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Scheduler Consumer"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "orange",
-                  "mode": "fixed"
-                }
-              }
-            ]
+            "matcher": { "id": "byName", "options": "Consumer Errors" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
           }
         ]
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 26
-      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 26 },
       "id": 9,
       "options": {
-        "legend": {
-          "calcs": [
-            "sum",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "legend": { "calcs": ["sum", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "title": "Consumer Processing Errors",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "increase(cce_consumer_inbound_errors_total{job=\"cce-intelligence-service\"}[1m])",
-          "legendFormat": "Inbound Consumer",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cce_intelligence_consumer_errors_total{job=\"cce-intelligence-service\"}[1m])",
+          "legendFormat": "Consumer Errors",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "increase(cce_consumer_scheduler_errors_total{job=\"cce-intelligence-service\"}[1m])",
-          "legendFormat": "Scheduler Consumer",
-          "refId": "B"
         }
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -884,50 +467,27 @@
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
+            "scaleDistribution": { "type": "linear" },
             "showPoints": "auto",
             "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            }
+            "stacking": { "group": "A", "mode": "none" }
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 26
-      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 26 },
       "id": 10,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "title": "Kafka Consumer Lag",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "kafka_consumer_fetch_manager_records_lag{job=\"cce-intelligence-service\"}",
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "kafka_consumer_records_lag_max{job=\"cce-intelligence-service\"}",
           "legendFormat": "{{topic}}-{{partition}}",
           "refId": "A"
         }
@@ -935,26 +495,16 @@
     },
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 34
-      },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 34 },
       "id": 104,
       "title": "Database Connection Pool",
       "type": "row"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -966,151 +516,65 @@
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
+            "scaleDistribution": { "type": "linear" },
             "showPoints": "auto",
             "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            }
+            "stacking": { "group": "A", "mode": "none" }
           },
           "unit": "short"
         },
         "overrides": [
           {
-            "matcher": {
-              "id": "byName",
-              "options": "Active"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "orange",
-                  "mode": "fixed"
-                }
-              }
-            ]
+            "matcher": { "id": "byName", "options": "Active" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }]
           },
           {
-            "matcher": {
-              "id": "byName",
-              "options": "Idle"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
+            "matcher": { "id": "byName", "options": "Idle" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
           },
           {
-            "matcher": {
-              "id": "byName",
-              "options": "Pending"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
+            "matcher": { "id": "byName", "options": "Pending" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
           },
           {
-            "matcher": {
-              "id": "byName",
-              "options": "Max"
-            },
+            "matcher": { "id": "byName", "options": "Max" },
             "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "white",
-                  "mode": "fixed"
-                }
-              },
-              {
-                "id": "custom.fillOpacity",
-                "value": 0
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "dash",
-                  "dash": [
-                    10,
-                    10
-                  ]
-                }
-              }
+              { "id": "color", "value": { "fixedColor": "white", "mode": "fixed" } },
+              { "id": "custom.fillOpacity", "value": 0 },
+              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } }
             ]
           }
         ]
       },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 35
-      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 35 },
       "id": 11,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "title": "HikariCP Connection Pool",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "hikaricp_connections_active{job=\"cce-intelligence-service\"}",
           "legendFormat": "Active",
           "refId": "A"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "hikaricp_connections_idle{job=\"cce-intelligence-service\"}",
           "legendFormat": "Idle",
           "refId": "B"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "hikaricp_connections_pending{job=\"cce-intelligence-service\"}",
           "legendFormat": "Pending",
           "refId": "C"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "hikaricp_connections_max{job=\"cce-intelligence-service\"}",
           "legendFormat": "Max",
           "refId": "D"
@@ -1119,26 +583,16 @@
     },
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 43
-      },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 43 },
       "id": 105,
       "title": "JVM Health",
       "type": "row"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -1150,71 +604,37 @@
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
+            "scaleDistribution": { "type": "linear" },
             "showPoints": "auto",
             "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "line"
-            }
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "line" }
           },
           "max": 1,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 0.85
-              },
-              {
-                "color": "red",
-                "value": 0.95
-              }
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.85 },
+              { "color": "red", "value": 0.95 }
             ]
           },
           "unit": "percentunit"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 44
-      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 44 },
       "id": 12,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "title": "Heap Usage",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "jvm_memory_used_bytes{area=\"heap\",job=\"cce-intelligence-service\"} / jvm_memory_max_bytes{area=\"heap\",job=\"cce-intelligence-service\"}",
           "legendFormat": "Heap Usage %",
           "refId": "A"
@@ -1222,15 +642,10 @@
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -1242,15 +657,10 @@
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
+            "scaleDistribution": { "type": "linear" },
             "showPoints": "auto",
             "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            }
+            "stacking": { "group": "A", "mode": "none" }
           },
           "max": 1,
           "min": 0,
@@ -1258,44 +668,23 @@
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 44
-      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 44 },
       "id": 13,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "title": "CPU Usage",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "process_cpu_usage{job=\"cce-intelligence-service\"}",
           "legendFormat": "Process CPU",
           "refId": "A"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "system_cpu_usage{job=\"cce-intelligence-service\"}",
           "legendFormat": "System CPU",
           "refId": "B"
@@ -1303,15 +692,10 @@
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "color": { "mode": "palette-classic" },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -1323,49 +707,26 @@
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
+            "scaleDistribution": { "type": "linear" },
             "showPoints": "auto",
             "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            }
+            "stacking": { "group": "A", "mode": "none" }
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 44
-      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 44 },
       "id": 14,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "title": "Live Threads",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "jvm_threads_live_threads{job=\"cce-intelligence-service\"}",
           "legendFormat": "Live Threads",
           "refId": "A"
@@ -1374,18 +735,11 @@
     }
   ],
   "schemaVersion": 39,
-  "tags": [
-    "cce",
-    "compliance"
-  ],
+  "tags": ["cce", "intelligence"],
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": "Prometheus",
-          "value": "Prometheus"
-        },
+        "current": { "selected": false, "text": "Prometheus", "value": "Prometheus" },
         "hide": 0,
         "includeAll": false,
         "name": "DS_PROMETHEUS",
@@ -1397,10 +751,7 @@
       }
     ]
   },
-  "time": {
-    "from": "now-3h",
-    "to": "now"
-  },
+  "time": { "from": "now-3h", "to": "now" },
   "timepicker": {},
   "timezone": "",
   "title": "CCE Intelligence Service",

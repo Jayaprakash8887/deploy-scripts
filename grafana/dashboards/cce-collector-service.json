@@ -392,8 +392,8 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "rate(spring_kafka_producer_record_send_total{job=\"cce-collector-service\"}[5m])",
-          "legendFormat": "records sent/s",
+          "expr": "rate(cce_collector_kafka_publish_success_total{job=\"cce-collector-service\"}[5m])",
+          "legendFormat": "records published/s",
           "refId": "A"
         }
       ]
@@ -450,21 +450,9 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "histogram_quantile(0.50, rate(http_server_requests_seconds_bucket{job=\"cce-collector-service\",uri=\"/v1/events\"}[5m]))",
-          "legendFormat": "p50",
+          "expr": "rate(http_server_requests_seconds_sum{job=\"cce-collector-service\",uri=\"/v1/events\"}[5m]) / rate(http_server_requests_seconds_count{job=\"cce-collector-service\",uri=\"/v1/events\"}[5m])",
+          "legendFormat": "avg latency",
           "refId": "A"
-        },
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{job=\"cce-collector-service\",uri=\"/v1/events\"}[5m]))",
-          "legendFormat": "p95",
-          "refId": "B"
-        },
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "histogram_quantile(0.99, rate(http_server_requests_seconds_bucket{job=\"cce-collector-service\",uri=\"/v1/events\"}[5m]))",
-          "legendFormat": "p99",
-          "refId": "C"
         }
       ]
     },
@@ -504,21 +492,9 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "histogram_quantile(0.50, rate(cce_collector_ingestion_duration_seconds_bucket{job=\"cce-collector-service\"}[5m]))",
-          "legendFormat": "p50",
+          "expr": "rate(cce_collector_ingestion_duration_seconds_sum{job=\"cce-collector-service\"}[5m]) / rate(cce_collector_ingestion_duration_seconds_count{job=\"cce-collector-service\"}[5m])",
+          "legendFormat": "avg duration",
           "refId": "A"
-        },
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "histogram_quantile(0.95, rate(cce_collector_ingestion_duration_seconds_bucket{job=\"cce-collector-service\"}[5m]))",
-          "legendFormat": "p95",
-          "refId": "B"
-        },
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "histogram_quantile(0.99, rate(cce_collector_ingestion_duration_seconds_bucket{job=\"cce-collector-service\"}[5m]))",
-          "legendFormat": "p99",
-          "refId": "C"
         }
       ]
     },

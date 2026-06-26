@@ -358,6 +358,8 @@ WHERE op IN ('c', 'u', 'r', 'd');
 -- ============================================================
 -- facility  (compliance service reference data)
 -- ============================================================
+-- Auto-populated by FacilityService when facilities appear in inbound FHIR events.
+-- expected_patients_per_day is INTEGER (nullable) in source → JSONExtractUInt returns 0 for null.
 CREATE TABLE IF NOT EXISTS facility_queue (raw String)
 ENGINE = Kafka(cce_kafka) SETTINGS
     kafka_topic_list  = 'cce.public.facility',
