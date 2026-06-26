@@ -1,0 +1,358 @@
+{
+  "__inputs": [],
+  "__elements": {},
+  "__requires": [
+    { "type": "datasource", "id": "postgres", "name": "PostgreSQL", "version": "1.0.0" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
+    { "type": "panel", "id": "table", "name": "Table", "version": "" }
+  ],
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "postgres", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgresql" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*)::bigint AS value FROM pg_stat_statements",
+          "refId": "A"
+        }
+      ],
+      "title": "Query Types Tracked",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgresql" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT sum(calls)::bigint AS value FROM pg_stat_statements",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Query Calls",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 1000 }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgresql" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT round(max(mean_exec_time)::numeric, 2) AS value FROM pg_stat_statements",
+          "refId": "A"
+        }
+      ],
+      "title": "Slowest Query (avg ms)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 90 },
+              { "color": "green", "value": 99 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgresql" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT round(sum(blks_hit)::numeric / nullif(sum(blks_hit) + sum(blks_read), 0) * 100, 2) AS value FROM pg_stat_database",
+          "refId": "A"
+        }
+      ],
+      "title": "Cache Hit Ratio",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": true },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "query" },
+            "properties": [
+              { "id": "custom.width", "value": 600 },
+              { "id": "displayName", "value": "Query" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_ms" },
+            "properties": [
+              { "id": "unit", "value": "ms" },
+              { "id": "displayName", "value": "Avg (ms)" },
+              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 100 },
+                { "color": "red", "value": 1000 }
+              ]}}
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "max_ms" },
+            "properties": [{ "id": "unit", "value": "ms" }, { "id": "displayName", "value": "Max (ms)" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "min_ms" },
+            "properties": [{ "id": "unit", "value": "ms" }, { "id": "displayName", "value": "Min (ms)" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "total_ms" },
+            "properties": [{ "id": "unit", "value": "ms" }, { "id": "displayName", "value": "Total (ms)" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "calls" },
+            "properties": [{ "id": "displayName", "value": "Calls" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "rows" },
+            "properties": [{ "id": "displayName", "value": "Rows" }]
+          }
+        ]
+      },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 4 },
+      "id": 5,
+      "options": { "cellHeight": "sm", "footer": { "show": false }, "showHeader": true },
+      "pluginVersion": "10.4.2",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgresql" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT LEFT(query, 200) AS query, calls, ROUND(mean_exec_time::numeric, 2) AS avg_ms, ROUND(min_exec_time::numeric, 2) AS min_ms, ROUND(max_exec_time::numeric, 2) AS max_ms, ROUND(total_exec_time::numeric, 2) AS total_ms, rows FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 10",
+          "refId": "A"
+        }
+      ],
+      "title": "Top 10 Slowest Queries (by avg execution time)",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": true }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "query" },
+            "properties": [{ "id": "custom.width", "value": 600 }, { "id": "displayName", "value": "Query" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "total_ms" },
+            "properties": [
+              { "id": "unit", "value": "ms" },
+              { "id": "displayName", "value": "Total Time (ms)" },
+              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 10000 },
+                { "color": "red", "value": 100000 }
+              ]}}
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_ms" },
+            "properties": [{ "id": "unit", "value": "ms" }, { "id": "displayName", "value": "Avg (ms)" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "calls" },
+            "properties": [{ "id": "displayName", "value": "Calls" }]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 16 },
+      "id": 6,
+      "options": { "cellHeight": "sm", "footer": { "show": false }, "showHeader": true },
+      "pluginVersion": "10.4.2",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgresql" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT LEFT(query, 150) AS query, calls, ROUND(total_exec_time::numeric, 2) AS total_ms, ROUND(mean_exec_time::numeric, 2) AS avg_ms, rows FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 10",
+          "refId": "A"
+        }
+      ],
+      "title": "Top 10 by Total Execution Time",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": true }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "query" },
+            "properties": [{ "id": "custom.width", "value": 400 }, { "id": "displayName", "value": "Query" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "calls" },
+            "properties": [
+              { "id": "displayName", "value": "Calls" },
+              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 1000 },
+                { "color": "red", "value": 10000 }
+              ]}}
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_ms" },
+            "properties": [{ "id": "unit", "value": "ms" }, { "id": "displayName", "value": "Avg (ms)" }]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 16 },
+      "id": 7,
+      "options": { "cellHeight": "sm", "footer": { "show": false }, "showHeader": true },
+      "pluginVersion": "10.4.2",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgresql" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT LEFT(query, 150) AS query, calls, ROUND(mean_exec_time::numeric, 2) AS avg_ms, rows FROM pg_stat_statements ORDER BY calls DESC LIMIT 10",
+          "refId": "A"
+        }
+      ],
+      "title": "Top 10 Most Called Queries",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": true }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "query" },
+            "properties": [{ "id": "custom.width", "value": 600 }, { "id": "displayName", "value": "Query" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "rows" },
+            "properties": [
+              { "id": "displayName", "value": "Rows" },
+              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 10000 },
+                { "color": "red", "value": 100000 }
+              ]}}
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_ms" },
+            "properties": [{ "id": "unit", "value": "ms" }, { "id": "displayName", "value": "Avg (ms)" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "calls" },
+            "properties": [{ "id": "displayName", "value": "Calls" }]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 26 },
+      "id": 8,
+      "options": { "cellHeight": "sm", "footer": { "show": false }, "showHeader": true },
+      "pluginVersion": "10.4.2",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgresql" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT LEFT(query, 200) AS query, rows, calls, ROUND(mean_exec_time::numeric, 2) AS avg_ms, ROUND(total_exec_time::numeric, 2) AS total_ms FROM pg_stat_statements ORDER BY rows DESC LIMIT 10",
+          "refId": "A"
+        }
+      ],
+      "title": "Top 10 by Rows Returned",
+      "type": "table"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 38,
+  "tags": ["postgresql", "pg_stat_statements", "cce"],
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "PostgreSQL Query Analytics",
+  "uid": "postgres-query-analytics",
+  "version": 1
+}

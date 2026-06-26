@@ -13,6 +13,7 @@ services:
     image: postgres:16
     container_name: postgres-uat
     restart: unless-stopped
+    command: postgres -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.track=all -c pg_stat_statements.max=10000
     ports:
       - "5433:5432"
     environment:
