@@ -153,6 +153,48 @@ ORDER BY (id)
 SETTINGS clean_deleted_rows = 'Always', min_age_to_force_merge_seconds = 120;
 
 
+-- ============================================================
+-- step_instance_history / protocol_instance_history (append-only CDC)
+-- ============================================================
+-- Append-only transition logs from compliance service (Flyway V4__state_history.sql).
+-- Each row is one state transition; the source tables are INSERT-only, so _is_deleted
+-- is always 0 and _version (LSN) only dedups at-least-once CDC re-delivery.
+-- ORDER BY (id) = the PostgreSQL BIGSERIAL PK, so every distinct transition is kept.
+-- These make point-in-time reconstruction of the schema/07 daily MVs possible after
+-- a full ClickHouse re-snapshot (see schema/09-historical-backfill.sql).
+
+CREATE TABLE IF NOT EXISTS protocol_instance_history
+(
+    id                      Int64,         -- PostgreSQL BIGSERIAL PK
+    protocol_instance_id    UUID,          -- backfill joins protocol_instances to recover protocol_definition_id
+    status                  String,        -- ACTIVE | COMPLETED | WITHDRAWN | EXPIRED
+    changed_at              DateTime64(6), -- when the transition occurred
+
+    _version             UInt64,
+    _is_deleted          UInt8 DEFAULT 0
+)
+ENGINE = ReplacingMergeTree(_version, _is_deleted)
+PARTITION BY toYYYYMM(changed_at)
+ORDER BY (id)
+SETTINGS clean_deleted_rows = 'Always', min_age_to_force_merge_seconds = 120;
+
+CREATE TABLE IF NOT EXISTS step_instance_history
+(
+    id                    Int64,           -- PostgreSQL BIGSERIAL PK
+    step_instance_id      UUID,            -- backfill joins step_instances to recover protocol_instance_id
+    state                 String,          -- PENDING | DUE | OVERDUE | MISSED | COMPLETED | SKIPPED
+    completion_status     String,          -- EARLY | ON_TIME | LATE  (set when state = COMPLETED)
+    changed_at            DateTime64(6),   -- when the transition occurred
+
+    _version             UInt64,
+    _is_deleted          UInt8 DEFAULT 0
+)
+ENGINE = ReplacingMergeTree(_version, _is_deleted)
+PARTITION BY toYYYYMM(changed_at)
+ORDER BY (id)
+SETTINGS clean_deleted_rows = 'Always', min_age_to_force_merge_seconds = 120;
+
+
 -- Compliance gaps recorded when steps become overdue or missed.
 -- Types: OVERDUE | MISSED | ORDER_VIOLATION
 CREATE TABLE IF NOT EXISTS deviations

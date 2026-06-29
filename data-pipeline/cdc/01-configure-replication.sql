@@ -44,13 +44,18 @@ GRANT SELECT ON TABLE
     compliance_event_log,
     receiver_adaptor,
     destination_adaptor_mapping,
-    facility
+    facility,
+    protocol_instance_history,
+    step_instance_history
 TO cce_cdc_user;
 
--- Step 5: REPLICA IDENTITY FULL on all CDC tables
+-- Step 5: REPLICA IDENTITY FULL on all 14 CDC tables (uniform)
 -- Required by Debezium so UPDATE/DELETE events include the full old-row image.
 -- facility sets this in its Flyway migration (V3__facility.sql) but
 -- listed here for completeness — ALTER is idempotent.
+-- NOTE: the two *_history tables are append-only (INSERT only), so FULL is a harmless no-op for
+-- them (default PK identity would also suffice) — applied for uniformity so every CDC table
+-- follows the same rule. Their V4 migration does not set it; it is set here only.
 ALTER TABLE protocol_definition          REPLICA IDENTITY FULL;
 ALTER TABLE protocol_instance            REPLICA IDENTITY FULL;
 ALTER TABLE step_instance                REPLICA IDENTITY FULL;
@@ -63,6 +68,8 @@ ALTER TABLE compliance_event_log         REPLICA IDENTITY FULL;
 ALTER TABLE receiver_adaptor             REPLICA IDENTITY FULL;
 ALTER TABLE destination_adaptor_mapping  REPLICA IDENTITY FULL;
 ALTER TABLE facility           REPLICA IDENTITY FULL;
+ALTER TABLE protocol_instance_history    REPLICA IDENTITY FULL;
+ALTER TABLE step_instance_history        REPLICA IDENTITY FULL;
 
 -- Step 6: Create publication for all CDC tables
 DROP PUBLICATION IF EXISTS cce_analytics_pub;
@@ -78,7 +85,9 @@ CREATE PUBLICATION cce_analytics_pub FOR TABLE
     compliance_event_log,
     receiver_adaptor,
     destination_adaptor_mapping,
-    facility;
+    facility,
+    protocol_instance_history,
+    step_instance_history;
 
 -- Step 7: Confirm replication role
 ALTER ROLE cce_cdc_user WITH REPLICATION;
