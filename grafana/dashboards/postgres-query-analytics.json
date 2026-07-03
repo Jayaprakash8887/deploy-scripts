@@ -191,7 +191,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT LEFT(query, 200) AS query, calls, ROUND(mean_exec_time::numeric, 2) AS avg_ms, ROUND(min_exec_time::numeric, 2) AS min_ms, ROUND(max_exec_time::numeric, 2) AS max_ms, ROUND(total_exec_time::numeric, 2) AS total_ms, rows FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 10",
+          "rawSql": "SELECT query, calls, ROUND(mean_exec_time::numeric, 2) AS avg_ms, ROUND(min_exec_time::numeric, 2) AS min_ms, ROUND(max_exec_time::numeric, 2) AS max_ms, ROUND(total_exec_time::numeric, 2) AS total_ms, rows FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 10",
           "refId": "A"
         }
       ],
@@ -242,7 +242,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT LEFT(query, 150) AS query, calls, ROUND(total_exec_time::numeric, 2) AS total_ms, ROUND(mean_exec_time::numeric, 2) AS avg_ms, rows FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 10",
+          "rawSql": "SELECT query, calls, ROUND(total_exec_time::numeric, 2) AS total_ms, ROUND(mean_exec_time::numeric, 2) AS avg_ms, rows FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 10",
           "refId": "A"
         }
       ],
@@ -288,7 +288,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT LEFT(query, 150) AS query, calls, ROUND(mean_exec_time::numeric, 2) AS avg_ms, rows FROM pg_stat_statements ORDER BY calls DESC LIMIT 10",
+          "rawSql": "SELECT query, calls, ROUND(mean_exec_time::numeric, 2) AS avg_ms, rows FROM pg_stat_statements ORDER BY calls DESC LIMIT 10",
           "refId": "A"
         }
       ],
@@ -338,7 +338,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT LEFT(query, 200) AS query, rows, calls, ROUND(mean_exec_time::numeric, 2) AS avg_ms, ROUND(total_exec_time::numeric, 2) AS total_ms FROM pg_stat_statements ORDER BY rows DESC LIMIT 10",
+          "rawSql": "SELECT query, rows, calls, ROUND(mean_exec_time::numeric, 2) AS avg_ms, ROUND(total_exec_time::numeric, 2) AS total_ms FROM pg_stat_statements ORDER BY rows DESC LIMIT 10",
           "refId": "A"
         }
       ],
