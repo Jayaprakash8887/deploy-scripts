@@ -34,6 +34,8 @@ configMapGenerator:
       - CLICKHOUSE_DB=cce_analytics
       # gateway-service CORS allowed origin. Concrete origin only, never "*".
       - ALLOWED_ORIGINS=${GATEWAY_ALLOWED_ORIGINS}
+      - BASIC_AUTH_ENABLED=${BASIC_AUTH_ENABLED}
+      - BASIC_AUTH_CLIENT_ID=${BASIC_AUTH_CLIENT_ID}
 
 secretGenerator:
   - name: cce-secrets
@@ -51,6 +53,7 @@ secretGenerator:
       - OPENHIM_PASSWORD=${OPENHIM_PASSWORD}
       - CLICKHOUSE_USER=${CLICKHOUSE_USER}
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
+      - BASIC_AUTH_CLIENT_SECRET=${BASIC_AUTH_CLIENT_SECRET}
 
 generatorOptions:
   disableNameSuffixHash: true
