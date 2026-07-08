@@ -90,6 +90,19 @@ spec:
               path: /auth/health/live
               port: 9000
             periodSeconds: 15
+          volumeMounts:
+            - name: insights-ui-theme
+              mountPath: /opt/keycloak/themes/insights-ui-theme
+              readOnly: true
+      # hostPath: single-node k3s cluster, repo checked out at /home/cceadmin/deploy-scripts on
+      # every environment. Mirrors the ./keycloak-themes bind mount in docker-compose.yml — a
+      # ConfigMap can't be used here since ConfigMap volumes flatten keys and lose the theme's
+      # nested login/resources/css directory structure.
+      volumes:
+        - name: insights-ui-theme
+          hostPath:
+            path: /home/cceadmin/deploy-scripts/keycloak-themes/insights-ui-theme
+            type: Directory
 ---
 apiVersion: v1
 kind: Service
