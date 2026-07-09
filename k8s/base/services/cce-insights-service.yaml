@@ -53,6 +53,14 @@ spec:
                 secretKeyRef:
                   name: cce-secrets
                   key: CLICKHOUSE_PASSWORD
+            # Feeds application.yml placeholder ${CLICKHOUSE_USE_FINAL} -> cce.clickhouse.use-final.
+            # When "true", MV reads append FINAL so ReplacingMergeTree intraday refresh snapshots are
+            # de-duplicated at query time (fixes adoption "actual visits" double-counting). From cce-config.
+            - name: CLICKHOUSE_USE_FINAL
+              valueFrom:
+                configMapKeyRef:
+                  name: cce-config
+                  key: CLICKHOUSE_USE_FINAL
             - name: DB_POOL_SIZE
               value: "10"
             - name: CACHE_TTL_LOOKUPS
