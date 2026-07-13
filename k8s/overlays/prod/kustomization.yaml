@@ -224,7 +224,6 @@ patches:
     patch: |
       - {op: replace, path: /spec/ports/0/targetPort, value: 9101}
 
-
 images:
   - name: ghcr.io/openphc/cce-collector-service
     newName: ghcr.io/openphc/cce-collector-service
