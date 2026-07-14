@@ -14,9 +14,11 @@ echo "=== CCE PROD Infrastructure Setup ==="
 echo ""
 
 # --- Configuration ---
+# POSTGRES_DB/POSTGRES_USER are a fixed platform convention (same on every environment) —
+# overridable via env for flexibility, but not meant to vary per env in practice.
 POSTGRES_VERSION=16
-POSTGRES_DB="ccedb"
-POSTGRES_USER="admin"
+POSTGRES_DB="${POSTGRES_DB:-ccedb}"
+POSTGRES_USER="${POSTGRES_USER:-admin}"
 POSTGRES_PASSWORD="${POSTGRES_PROD_PASSWORD:?set POSTGRES_PROD_PASSWORD in the environment}"
 POSTGRES_PORT=5432
 
