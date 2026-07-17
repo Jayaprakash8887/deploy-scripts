@@ -35,6 +35,14 @@ configMapGenerator:
       # ClickHouse already holds 8123/9009/9363 on this shared VM): HTTP 8124, metrics 9364.
       - CLICKHOUSE_PORT=8124
       - CLICKHOUSE_DB=cce_analytics
+      # insights-service cce.clickhouse.use-final -- "true" appends FINAL to MV reads so
+      # ReplacingMergeTree intraday snapshots are de-duplicated at query time. Set in Infisical.
+      - CLICKHOUSE_USE_FINAL=${CLICKHOUSE_USE_FINAL}
+      # insights-service Caffeine cache TTLs (seconds -- CacheConfig.java uses TimeUnit.SECONDS
+      # despite these keys' historical minutes-style naming/values). Set in Infisical.
+      - CACHE_TTL_LOOKUPS=${CACHE_TTL_LOOKUPS}
+      - CACHE_TTL_ANALYTICS=${CACHE_TTL_ANALYTICS}
+      - CACHE_TTL_METRICS=${CACHE_TTL_METRICS}
       # gateway-service CORS allowed origin. Concrete origin only, never "*".
       - ALLOWED_ORIGINS=${GATEWAY_ALLOWED_ORIGINS}
       - BASIC_AUTH_ENABLED=${BASIC_AUTH_ENABLED}
