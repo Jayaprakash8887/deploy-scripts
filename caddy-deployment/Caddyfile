@@ -104,3 +104,31 @@ portainer.cce.mdtlabs.org {
         header_up X-Forwarded-Proto https
     }
 }
+
+cc.mdtlabs.org {
+    handle_path /cc/* {
+        @ui path /ui /ui/ /
+        rewrite @ui /
+        reverse_proxy localhost:8075 {
+            header_up Host {host}
+            header_up X-Forwarded-For {remote}
+            header_up X-Forwarded-Proto https
+        }
+    }
+
+    handle /bap/* {
+        reverse_proxy localhost:8076 {
+            header_up Host {host}
+            header_up X-Forwarded-For {remote}
+            header_up X-Forwarded-Proto https
+        }
+    }
+
+    handle /bpp/* {
+        reverse_proxy localhost:8077 {
+            header_up Host {host}
+            header_up X-Forwarded-For {remote}
+            header_up X-Forwarded-Proto https
+        }
+    }
+}
