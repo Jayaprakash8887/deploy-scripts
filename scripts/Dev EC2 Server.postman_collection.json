@@ -1,0 +1,3011 @@
+{
+	"info": {
+		"_postman_id": "0b30c520-300c-4e59-b977-74edb7bc94d4",
+		"name": "Dev EC2 Server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "dev",
+			"item": [
+				{
+					"name": "Protocol Definitions",
+					"item": [
+						{
+							"name": "Load Protocol Definition",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"planDefinitionJson\": \"{\\\"resourceType\\\":\\\"PlanDefinition\\\",\\\"url\\\":\\\"http://example.org/PlanDefinition/hiv-treatment\\\",\\\"version\\\":\\\"1.0\\\",\\\"status\\\":\\\"active\\\",\\\"action\\\":[{\\\"id\\\":\\\"viral-load-check\\\",\\\"trigger\\\":[{\\\"type\\\":\\\"data-added\\\",\\\"data\\\":[{\\\"type\\\":\\\"Observation\\\",\\\"codeFilter\\\":[{\\\"path\\\":\\\"code\\\",\\\"code\\\":[{\\\"system\\\":\\\"http://loinc.org\\\",\\\"code\\\":\\\"25836-8\\\"}]}]}]}],\\\"condition\\\":[{\\\"kind\\\":\\\"applicability\\\",\\\"expression\\\":{\\\"language\\\":\\\"text/jsonlogic\\\",\\\"expression\\\":\\\"{\\\\\\\">=\\\\\\\":[{\\\\\\\"var\\\\\\\":\\\\\\\"event.valueQuantity.value\\\\\\\"},1000]}\\\"}}]}]}\"\n}"
+								},
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/protocol-definitions",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"protocol-definitions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Protocol Definitions",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/protocol-definitions?page=0&size=20&sort=loadedAt,desc",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"protocol-definitions"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										},
+										{
+											"key": "sort",
+											"value": "loadedAt,desc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Protocol Definition by ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/protocol-definitions/:id",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"protocol-definitions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "550e8400-e29b-41d4-a716-446655440000",
+											"description": "Protocol definition ID (UUID)"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Protocol Definitions by URL",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/protocol-definitions/by-url?url=http://example.org/PlanDefinition/hiv-treatment",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"protocol-definitions",
+										"by-url"
+									],
+									"query": [
+										{
+											"key": "url",
+											"value": "http://example.org/PlanDefinition/hiv-treatment"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Protocol Definition by URL and Version",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/protocol-definitions/by-url-version?url=http://example.org/PlanDefinition/hiv-treatment&version=1.0",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"protocol-definitions",
+										"by-url-version"
+									],
+									"query": [
+										{
+											"key": "url",
+											"value": "http://example.org/PlanDefinition/hiv-treatment"
+										},
+										{
+											"key": "version",
+											"value": "1.0"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Retire Protocol Definition",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/protocol-definitions/:id/retire",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"protocol-definitions",
+										":id",
+										"retire"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "550e8400-e29b-41d4-a716-446655440000",
+											"description": "Protocol definition ID (UUID)"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Rebuild Trigger Index",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/protocol-definitions/:id/rebuild-index",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"protocol-definitions",
+										":id",
+										"rebuild-index"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "550e8400-e29b-41d4-a716-446655440000",
+											"description": "Protocol definition ID (UUID)"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Protocol Definition",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/protocol-definitions/:id",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"protocol-definitions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "550e8400-e29b-41d4-a716-446655440000",
+											"description": "Protocol definition ID (UUID)"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Action Definitions",
+					"item": [
+						{
+							"name": "Create Action Definition",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"definitionJson\": \"{\\\"resourceType\\\":\\\"ActivityDefinition\\\",\\\"url\\\":\\\"ActivityDefinition/anc-escalation-notification\\\",\\\"version\\\":\\\"1.0\\\",\\\"name\\\":\\\"anc-escalation-notification\\\",\\\"title\\\":\\\"ANC Escalation Notification\\\",\\\"status\\\":\\\"active\\\",\\\"kind\\\":\\\"CommunicationRequest\\\"}\"\n}"
+								},
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/action-definitions",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"action-definitions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Action Definitions",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/action-definitions?status=ACTIVE&page=0&size=20&sort=createdAt,desc",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"action-definitions"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "ACTIVE",
+											"description": "Filter by status (ACTIVE, RETIRED)"
+										},
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										},
+										{
+											"key": "sort",
+											"value": "createdAt,desc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Action Definition by ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/action-definitions/:id",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"action-definitions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "aa0e8400-e29b-41d4-a716-446655440010",
+											"description": "Action definition ID (UUID)"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Action Definition",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"definitionJson\": \"{\\\"resourceType\\\":\\\"ActivityDefinition\\\",\\\"url\\\":\\\"ActivityDefinition/anc-escalation-notification\\\",\\\"version\\\":\\\"1.0\\\",\\\"name\\\":\\\"anc-escalation-notification\\\",\\\"title\\\":\\\"ANC Escalation Notification\\\",\\\"status\\\":\\\"active\\\",\\\"kind\\\":\\\"CommunicationRequest\\\"}\"\n}"
+								},
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/action-definitions/:id",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"action-definitions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "aa0e8400-e29b-41d4-a716-446655440010",
+											"description": "Action definition ID (UUID)"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Retire Action Definition",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/action-definitions/:id/retire",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"action-definitions",
+										":id",
+										"retire"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "aa0e8400-e29b-41d4-a716-446655440010",
+											"description": "Action definition ID (UUID)"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Action Definition",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/action-definitions/:id",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"action-definitions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "aa0e8400-e29b-41d4-a716-446655440010",
+											"description": "Action definition ID (UUID)"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Intelligence Events",
+					"item": [
+						{
+							"name": "List Intelligence Events",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/intelligence-events?page=0&size=20&sort=createdAt,desc",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"intelligence-events"
+									],
+									"query": [
+										{
+											"key": "protocolInstanceId",
+											"value": "",
+											"description": "Filter by protocol instance (UUID)",
+											"disabled": true
+										},
+										{
+											"key": "actionDefinitionId",
+											"value": "",
+											"description": "Filter by action definition (UUID)",
+											"disabled": true
+										},
+										{
+											"key": "published",
+											"value": "true",
+											"description": "Filter by publish status (true/false)",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										},
+										{
+											"key": "sort",
+											"value": "createdAt,desc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Intelligence Event by ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/compliance/intelligence-events/:id",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"compliance",
+										"intelligence-events",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "bb0e8400-e29b-41d4-a716-446655440020",
+											"description": "Intelligence event log ID (UUID)"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Collector (Events)",
+					"item": [
+						{
+							"name": "Ingest Event",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{dev_base_url}}/v1/events",
+									"host": [
+										"{{dev_base_url}}"
+									],
+									"path": [
+										"v1",
+										"events"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"specversion\": \"1.0\",\n  \"id\": \"evt-encounter-2024-001234\",\n  \"source\": \"ebuzima/kigali-south\",\n  \"type\": \"cce.encounter.created\",\n  \"subject\": \"260225-0002-5501\",\n  \"time\": \"2025-01-15T09:30:00Z\",\n  \"datacontenttype\": \"application/fhir+json\",\n  \"facilityid\": \"facility/FAC-KGL-S-001\",\n  \"correlationid\": \"corr-abc123-def456\",\n  \"data\": {\n    \"resourceType\": \"Encounter\",\n    \"id\": \"enc-2024-001234\",\n    \"status\": \"finished\",\n    \"class\": {\n      \"system\": \"http://terminology.hl7.org/CodeSystem/v3-ActCode\",\n      \"code\": \"AMB\",\n      \"display\": \"ambulatory\"\n    },\n    \"subject\": {\n      \"reference\": \"Patient/260225-0002-5501\"\n    },\n    \"period\": {\n      \"start\": \"2025-01-15T09:00:00Z\",\n      \"end\": \"2025-01-15T09:30:00Z\"\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Insights",
+					"item": [
+						{
+							"name": "Compliance Summaries",
+							"item": [
+								{
+									"name": "Protocol Compliance Summary",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/protocols/:protocolDefinitionId/compliance-summary",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"protocols",
+												":protocolDefinitionId",
+												"compliance-summary"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Protocol definition ID (UUID)"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Facility Compliance Summary",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/facilities/:facilityId/compliance-summary",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"facilities",
+												":facilityId",
+												"compliance-summary"
+											],
+											"query": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Filter by protocol definition (UUID)",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Facility ID"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Protocol Enrolled Patients",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/protocols/:protocolDefinitionId/patients",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"protocols",
+												":protocolDefinitionId",
+												"patients"
+											],
+											"query": [
+												{
+													"key": "status",
+													"value": "ACTIVE",
+													"description": "Filter by status",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "50",
+													"description": "Page size",
+													"disabled": true
+												},
+												{
+													"key": "cursor",
+													"value": "",
+													"description": "Opaque pagination cursor",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Protocol definition ID (UUID)"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "All Protocols Compliance Summary",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/protocols/compliance-summary",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"protocols",
+												"compliance-summary"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Patient Compliance",
+							"item": [
+								{
+									"name": "Patient Compliance Timeline",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/patients/:patientId/compliance-timeline",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"patients",
+												":patientId",
+												"compliance-timeline"
+											],
+											"query": [
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "patientId",
+													"value": "260225-0002-5501",
+													"description": "Patient ID"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Patient Protocol Tracking",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/patients/:patientId/protocol-tracking",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"patients",
+												":patientId",
+												"protocol-tracking"
+											],
+											"variable": [
+												{
+													"key": "patientId",
+													"value": "260225-0002-5501",
+													"description": "Patient ID"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Patient Protocol Tracking (Instance)",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/patients/:patientId/protocol-tracking/:protocolInstanceId",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"patients",
+												":patientId",
+												"protocol-tracking",
+												":protocolInstanceId"
+											],
+											"variable": [
+												{
+													"key": "patientId",
+													"value": "260225-0002-5501",
+													"description": "Patient ID"
+												},
+												{
+													"key": "protocolInstanceId",
+													"value": "cc0e8400-e29b-41d4-a716-446655440030",
+													"description": "Protocol instance ID (UUID)"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Patient Events",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/patients/:patientId/events",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"patients",
+												":patientId",
+												"events"
+											],
+											"query": [
+												{
+													"key": "resourceType",
+													"value": "Observation",
+													"description": "FHIR resource type",
+													"disabled": true
+												},
+												{
+													"key": "source",
+													"value": "ebuzima/kigali-south",
+													"description": "Event source system",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "50",
+													"description": "Page size",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "patientId",
+													"value": "260225-0002-5501",
+													"description": "Patient ID"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Patient Deviations",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/patients/:patientId/deviations",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"patients",
+												":patientId",
+												"deviations"
+											],
+											"query": [
+												{
+													"key": "deviationType",
+													"value": "",
+													"description": "Filter by deviation type",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "patientId",
+													"value": "260225-0002-5501",
+													"description": "Patient ID"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Deviations & Intelligence",
+							"item": [
+								{
+									"name": "List Deviations",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/deviations",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"deviations"
+											],
+											"query": [
+												{
+													"key": "deviationType",
+													"value": "",
+													"description": "Filter by deviation type",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Filter by protocol definition (UUID)",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "sort",
+													"value": "detected_at:desc",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "50",
+													"description": "Page size",
+													"disabled": true
+												},
+												{
+													"key": "cursor",
+													"value": "",
+													"description": "Opaque pagination cursor",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Deviation Trends",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/deviations/trends",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"deviations",
+												"trends"
+											],
+											"query": [
+												{
+													"key": "interval",
+													"value": "weekly",
+													"description": "Bucket interval (daily/weekly/monthly)",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Filter by protocol definition (UUID)",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Intelligence Summary",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/intelligence/summary",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"intelligence",
+												"summary"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Deviation Intelligence Summary",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/deviations/intelligence-summary",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"deviations",
+												"intelligence-summary"
+											],
+											"query": [
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Event Volume & Activity",
+							"item": [
+								{
+									"name": "Events Summary",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/events/summary",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"events",
+												"summary"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "source",
+													"value": "ebuzima/kigali-south",
+													"description": "Event source system",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Events Trends",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/events/trends",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"events",
+												"trends"
+											],
+											"query": [
+												{
+													"key": "interval",
+													"value": "weekly",
+													"description": "Bucket interval (daily/weekly/monthly)",
+													"disabled": true
+												},
+												{
+													"key": "resourceType",
+													"value": "Observation",
+													"description": "FHIR resource type",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "source",
+													"value": "ebuzima/kigali-south",
+													"description": "Event source system",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Events by Resource Type",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/events/by-resource-type",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"events",
+												"by-resource-type"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "source",
+													"value": "ebuzima/kigali-south",
+													"description": "Event source system",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Events by Facility",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/events/by-facility",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"events",
+												"by-facility"
+											],
+											"query": [
+												{
+													"key": "resourceType",
+													"value": "Observation",
+													"description": "FHIR resource type",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "50",
+													"description": "Page size",
+													"disabled": true
+												},
+												{
+													"key": "cursor",
+													"value": "",
+													"description": "Opaque pagination cursor",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Events by Practitioner",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/events/by-practitioner",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"events",
+												"by-practitioner"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "resourceType",
+													"value": "Observation",
+													"description": "FHIR resource type",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "50",
+													"description": "Page size",
+													"disabled": true
+												},
+												{
+													"key": "cursor",
+													"value": "",
+													"description": "Opaque pagination cursor",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Events by Source",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/events/by-source",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"events",
+												"by-source"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Events Source Comparison",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/events/source-comparison?sourceA=ebuzima/kigali-south&sourceB=openmrs/kigali-south",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"events",
+												"source-comparison"
+											],
+											"query": [
+												{
+													"key": "sourceA",
+													"value": "ebuzima/kigali-south",
+													"description": "First source (required)"
+												},
+												{
+													"key": "sourceB",
+													"value": "openmrs/kigali-south",
+													"description": "Second source (required)"
+												},
+												{
+													"key": "windowSeconds",
+													"value": "300",
+													"description": "Match window in seconds",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "sampleLimit",
+													"value": "20",
+													"description": "Max sample rows",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Events Processing Quality",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/events/processing-quality",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"events",
+												"processing-quality"
+											],
+											"query": [
+												{
+													"key": "source",
+													"value": "ebuzima/kigali-south",
+													"description": "Event source system",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Protocol Analytics",
+							"item": [
+								{
+									"name": "Step Analytics",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/protocols/:protocolDefinitionId/step-analytics",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"protocols",
+												":protocolDefinitionId",
+												"step-analytics"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Protocol definition ID (UUID)"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Completion Funnel",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/protocols/:protocolDefinitionId/completion-funnel",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"protocols",
+												":protocolDefinitionId",
+												"completion-funnel"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Protocol definition ID (UUID)"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Outcome Distribution",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/protocols/:protocolDefinitionId/outcome-distribution",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"protocols",
+												":protocolDefinitionId",
+												"outcome-distribution"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Protocol definition ID (UUID)"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Enrollment Trends",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/protocols/:protocolDefinitionId/enrollment-trends",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"protocols",
+												":protocolDefinitionId",
+												"enrollment-trends"
+											],
+											"query": [
+												{
+													"key": "interval",
+													"value": "weekly",
+													"description": "Bucket interval (daily/weekly/monthly)",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Protocol definition ID (UUID)"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Action Order",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/protocols/:protocolDefinitionId/action-order",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"protocols",
+												":protocolDefinitionId",
+												"action-order"
+											],
+											"variable": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Protocol definition ID (UUID)"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Facility & Practitioner Analytics",
+							"item": [
+								{
+									"name": "Facility Ranking",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/facilities/ranking",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"facilities",
+												"ranking"
+											],
+											"query": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Filter by protocol definition (UUID)",
+													"disabled": true
+												},
+												{
+													"key": "rankBy",
+													"value": "complianceRate",
+													"description": "Ranking metric",
+													"disabled": true
+												},
+												{
+													"key": "order",
+													"value": "desc",
+													"description": "asc | desc",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "50",
+													"description": "Page size",
+													"disabled": true
+												},
+												{
+													"key": "cursor",
+													"value": "",
+													"description": "Opaque pagination cursor",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Practitioner Ranking",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/practitioners/ranking",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"practitioners",
+												"ranking"
+											],
+											"query": [
+												{
+													"key": "rankBy",
+													"value": "complianceRate",
+													"description": "Ranking metric",
+													"disabled": true
+												},
+												{
+													"key": "order",
+													"value": "desc",
+													"description": "asc | desc",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "50",
+													"description": "Page size",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Deviation Analytics",
+							"item": [
+								{
+									"name": "Deviations by Action",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/deviations/by-action",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"deviations",
+												"by-action"
+											],
+											"query": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Filter by protocol definition (UUID)",
+													"disabled": true
+												},
+												{
+													"key": "deviationType",
+													"value": "",
+													"description": "Filter by deviation type",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "20",
+													"description": "Page size",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Deviation Resolution Rate",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/deviations/resolution-rate",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"deviations",
+												"resolution-rate"
+											],
+											"query": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Filter by protocol definition (UUID)",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Patient Risk",
+							"item": [
+								{
+									"name": "At-Risk Hotspots",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/patients/at-risk-hotspots",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"patients",
+												"at-risk-hotspots"
+											],
+											"query": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Filter by protocol definition (UUID)",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "50",
+													"description": "Page size",
+													"disabled": true
+												},
+												{
+													"key": "cursor",
+													"value": "",
+													"description": "Opaque pagination cursor",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Repeat Deviations",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/patients/repeat-deviations",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"patients",
+												"repeat-deviations"
+											],
+											"query": [
+												{
+													"key": "minDeviations",
+													"value": "3",
+													"description": "Minimum deviation count threshold",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Filter by protocol definition (UUID)",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "50",
+													"description": "Page size",
+													"disabled": true
+												},
+												{
+													"key": "cursor",
+													"value": "",
+													"description": "Opaque pagination cursor",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Ingestion Analytics",
+							"item": [
+								{
+									"name": "Ingestion Funnel",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/ingestion/funnel",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"ingestion",
+												"funnel"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "source",
+													"value": "ebuzima/kigali-south",
+													"description": "Event source system",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "interval",
+													"value": "weekly",
+													"description": "Bucket interval (daily/weekly/monthly)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Ingestion Rejections",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/ingestion/rejections",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"ingestion",
+												"rejections"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "source",
+													"value": "ebuzima/kigali-south",
+													"description": "Event source system",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Ingestion Source Quality",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/ingestion/source-quality",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"ingestion",
+												"source-quality"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Ingestion Pipeline Loss",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/ingestion/pipeline-loss",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"ingestion",
+												"pipeline-loss"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Lookups",
+							"item": [
+								{
+									"name": "Lookup Protocols",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/lookups/protocols",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"lookups",
+												"protocols"
+											],
+											"query": [
+												{
+													"key": "status",
+													"value": "ACTIVE",
+													"description": "Filter by status",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Lookup Facilities",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/lookups/facilities",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"lookups",
+												"facilities"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Lookup Practitioners",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/lookups/practitioners",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"lookups",
+												"practitioners"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Lookup Sources",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/lookups/sources",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"lookups",
+												"sources"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Lookup Patients",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/lookups/patients",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"lookups",
+												"patients"
+											],
+											"query": [
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Filter by protocol definition (UUID)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Dashboard",
+							"item": [
+								{
+									"name": "Dashboard Overview",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/dashboard/overview",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"dashboard",
+												"overview"
+											],
+											"query": [
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Dashboard Compliance Summary",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/dashboard/compliance-summary",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"dashboard",
+												"compliance-summary"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Exports",
+							"item": [
+								{
+									"name": "Export Compliance Report",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{dev_base_url}}/v1/insights/exports/compliance-report",
+											"host": [
+												"{{dev_base_url}}"
+											],
+											"path": [
+												"v1",
+												"insights",
+												"exports",
+												"compliance-report"
+											],
+											"query": [
+												{
+													"key": "format",
+													"value": "json",
+													"description": "Export format (json/csv)",
+													"disabled": true
+												},
+												{
+													"key": "protocolDefinitionId",
+													"value": "550e8400-e29b-41d4-a716-446655440000",
+													"description": "Filter by protocol definition (UUID)",
+													"disabled": true
+												},
+												{
+													"key": "facilityId",
+													"value": "facility/FAC-KGL-S-001",
+													"description": "Filter by facility id",
+													"disabled": true
+												},
+												{
+													"key": "startDate",
+													"value": "2025-01-01",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												},
+												{
+													"key": "endDate",
+													"value": "2025-12-31",
+													"description": "ISO date (inclusive)",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Dev EC2 KC Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var token = pm.response.json().access_token;",
+									"    pm.collectionVariables.set('dev_token', token);",
+									"    console.log('dev_token updated');",
+									"} else {",
+									"    console.warn('KC token request failed: ' + pm.response.code);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "openhim-emitter-adaptor",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "",
+									"type": "text",
+									"description": "Fill in from Infisical /keycloak (dev) \u2014 not stored here"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://keycloak.cce.mdtlabs.org/realms/cce/protocol/openid-connect/token",
+							"protocol": "https",
+							"host": [
+								"keycloak",
+								"cce",
+								"mdtlabs",
+								"org"
+							],
+							"path": [
+								"realms",
+								"cce",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{dev_token}}",
+						"type": "string"
+					}
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "dev_base_url",
+			"value": "https://api.cce.mdtlabs.org",
+			"type": "string"
+		},
+		{
+			"key": "dev_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
