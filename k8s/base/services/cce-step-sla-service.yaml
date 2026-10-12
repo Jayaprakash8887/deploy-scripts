@@ -1,35 +1,37 @@
+# CCE 2.0.0 — Step SLA replaces the retired 1.x cce-scheduler-service: sweeps
+# step_sla_state_transition and records OVERDUE / MISSED. No Kafka, no DDL of its own (ddl-auto:
+# validate against Matcher's schema). Replicas are safe side by side (FOR UPDATE SKIP LOCKED fetch),
+# so no leader election and no special rollout strategy.
+# Must NOT run while Matcher works through an event backlog (a replay, or its first start after the
+# upgrade): it would judge steps whose completing event is still queued, and never revises a verdict.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cce-compliance-service
+  name: cce-step-sla-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cce-compliance-service
+      app: cce-step-sla-service
   template:
     metadata:
       labels:
-        app: cce-compliance-service
+        app: cce-step-sla-service
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: /actuator/prometheus
-        prometheus.io/port: "8080"
+        prometheus.io/port: "8092"
     spec:
       containers:
-        - name: cce-compliance-service
-          image: ghcr.io/openphc/cce-compliance-service:release-1.0.0
+        - name: cce-step-sla-service
+          image: ghcr.io/openphc/cce-step-sla-service:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 8092
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
-            # Paketo caps -XX:MaxDirectMemorySize at 10m by default; the Kafka consumer needs
-            # bigger direct buffers to fetch a large backlog (e.g. a replay) — raise to 512m.
-            - name: JAVA_TOOL_OPTIONS
-              value: "-XX:MaxDirectMemorySize=512m"
             - name: SERVER_PORT
-              value: "8080"
+              value: "8092"
             - name: DB_HOST
               valueFrom:
                 configMapKeyRef:
@@ -56,65 +58,44 @@ spec:
                   name: cce-secrets
                   key: POSTGRES_PASSWORD
             - name: DB_POOL_SIZE
-              value: "30"
-            - name: DB_POOL_MIN_IDLE
-              value: "10"
-            - name: DB_CONNECTION_TIMEOUT
-              value: "30000"
-            - name: DB_IDLE_TIMEOUT
-              value: "600000"
-            - name: DB_MAX_LIFETIME
-              value: "1800000"
-            - name: SPRING_FLYWAY_ENABLED
-              value: "false"
-            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
-              value: "update"
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              valueFrom:
-                configMapKeyRef:
-                  name: cce-config
-                  key: KAFKA_BOOTSTRAP_SERVERS
-            - name: KAFKA_CONCURRENCY
-              value: "5"
-            - name: KAFKA_PARTITIONS
-              value: "25"
-            - name: KAFKA_RETRY_MAX_ATTEMPTS
-              value: "5"
-            - name: KAFKA_RETRY_BACKOFF_MS
-              value: "2000"
-            - name: TRACING_SAMPLE_RATE
-              value: "0.1"
+              value: "3"
+            # CCE_SLA_INSTANCE_ID is left unset: it defaults to HOSTNAME, the pod name, so each
+            # replica gets its own id.
+            - name: CCE_SLA_BATCH_SIZE
+              value: "100"
             - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
               value: "health,info,prometheus,metrics"
             - name: MANAGEMENT_METRICS_TAGS_APPLICATION
-              value: "cce-compliance-service"
+              value: "cce-step-sla-service"
+            - name: BPL_JVM_THREAD_COUNT
+              value: "50"
           resources:
             requests:
               memory: 256Mi
-              cpu: 200m
+              cpu: 100m
             limits:
-              memory: 1536Mi
-              cpu: "1"
+              memory: 768Mi
+              cpu: 500m
           livenessProbe:
             httpGet:
               path: /actuator/health
-              port: 8080
+              port: 8092
             initialDelaySeconds: 60
             periodSeconds: 15
           readinessProbe:
             httpGet:
               path: /actuator/health
-              port: 8080
+              port: 8092
             initialDelaySeconds: 30
             periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cce-compliance-service
+  name: cce-step-sla-service
 spec:
   selector:
-    app: cce-compliance-service
+    app: cce-step-sla-service
   ports:
-    - port: 8080
-      targetPort: 8080
+    - port: 8092
+      targetPort: 8092

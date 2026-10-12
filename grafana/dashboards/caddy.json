@@ -55,7 +55,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -106,7 +106,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -128,7 +128,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -180,7 +180,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -202,7 +202,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -255,7 +255,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "sum(rate(caddy_http_request_duration_seconds_count{instance=~\"$host\",handler=~\"$handler\"}[5m])) by (handler)",
@@ -273,7 +273,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -328,7 +328,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "sum(caddy_http_request_duration_seconds_count{instance=~\"$host\",handler=~\"$handler\"}) by (code)",
@@ -364,7 +364,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -418,7 +418,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "sum(caddy_http_request_errors_total{instance=~\"$host\",handler=~\"$handler\"}) by (handler)",
@@ -467,7 +467,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -589,7 +589,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "expr": "avg(rate(caddy_http_requests_total{instance=~\"$host\",handler=~\"$handler\"}[5m])*10) by (handler)",
           "instant": false,
@@ -617,7 +617,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -739,7 +739,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "avg(avg_over_time(caddy_http_requests_in_flight{instance=~\"$host\",handler=~\"$handler\"}[1m])) by (handler)",
@@ -777,7 +777,7 @@
       "dataFormat": "tsbuckets",
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -865,7 +865,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "sum(increase(caddy_http_request_duration_seconds_bucket{instance=~\"$host\", handler=~\"$handler\"}[5m])) by (le)",
@@ -896,7 +896,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "description": "",
       "fieldConfig": {
@@ -979,7 +979,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "expr": "histogram_quantile(0.5, sum by (le) (rate(caddy_http_response_duration_seconds_bucket[5m])))",
           "format": "time_series",
@@ -996,7 +996,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "description": "",
       "fieldConfig": {
@@ -1078,7 +1078,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "expr": "sum(rate(caddy_http_request_duration_seconds_count{instance=~\"$host\",handler=~\"$handler\"}[5m])) by (handler)",
           "interval": "",
@@ -1092,7 +1092,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "description": "",
       "fieldConfig": {
@@ -1175,7 +1175,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "expr": "histogram_quantile(0.5, sum by (le) (rate(caddy_http_response_size_bytes_bucket{instance=~\"$host\"}[5m])))",
           "format": "time_series",
@@ -1193,7 +1193,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1316,7 +1316,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "sum(irate(caddy_http_request_duration_seconds_count{instance=~\"$host\",handler=~\"$handler\"}[1m])) by (code)",
@@ -1345,7 +1345,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "description": "",
       "fieldConfig": {
@@ -1427,7 +1427,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.99, sum(rate(caddy_http_request_duration_seconds_bucket{instance=~\"$host\",handler=~\"$handler\"}[1m])) by (le))",
@@ -1441,7 +1441,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum(rate(caddy_http_request_duration_seconds_bucket{instance=~\"$host\",handler=~\"$handler\"}[1m])) by (le))",
@@ -1456,7 +1456,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.90, sum(rate(caddy_http_request_duration_seconds_bucket{instance=~\"$host\",handler=~\"$handler\"}[1m])) by (le))",
@@ -1471,7 +1471,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.75, sum(rate(caddy_http_request_duration_seconds_bucket{instance=~\"$host\",handler=~\"$handler\"}[1m])) by (le))",
@@ -1486,7 +1486,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.5, sum(rate(caddy_http_request_duration_seconds_bucket{instance=~\"$host\",handler=~\"$handler\"}[1m])) by (le))",
@@ -1529,7 +1529,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1647,7 +1647,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "sum(caddy_http_request_duration_seconds_count{instance=~\"$host\",handler=~\"$handler\"}) by (code)",
@@ -1664,7 +1664,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1744,7 +1744,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "disableTextWrap": false,
           "editorMode": "builder",
@@ -1785,7 +1785,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS-INDUMIA}"
+        "uid": "${datasourceprometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1904,7 +1904,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS-INDUMIA}"
+            "uid": "${datasourceprometheus}"
           },
           "editorMode": "code",
           "expr": "avg(rate(caddy_http_request_errors_total{instance=~\"$host\",handler=~\"$handler\"}[5m])*10) by (handler)",
@@ -1934,7 +1934,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI-INDUMIA}"
+        "uid": "${datasourceloki}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2009,7 +2009,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI-INDUMIA}"
+            "uid": "${datasourceloki}"
           },
           "editorMode": "code",
           "expr": "{filename=\"$logfile\"} | json | line_format \"{{.status}}\"",
@@ -2035,7 +2035,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI-INDUMIA}"
+        "uid": "${datasourceloki}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2127,7 +2127,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI-INDUMIA}"
+            "uid": "${datasourceloki}"
           },
           "editorMode": "code",
           "expr": "{filename=\"$logfile\"} | json | line_format \"{{.status}}\"",
@@ -2200,7 +2200,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI-INDUMIA}"
+        "uid": "${datasourceloki}"
       },
       "gridPos": {
         "h": 33,
@@ -2224,7 +2224,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI-INDUMIA}"
+            "uid": "${datasourceloki}"
           },
           "editorMode": "code",
           "expr": "{filename=\"$logfile\"} | json | line_format \"- [HTTP Status: {{.status}} - Duration: {{.duration}} - Client IP: {{.request_client_ip}} - Request: {{.request_uri}}]\"",
@@ -2268,7 +2268,7 @@
         "current": {},
         "datasource": {
           "type": "loki",
-          "uid": "${DS_LOKI-INDUMIA}"
+          "uid": "${datasourceloki}"
         },
         "definition": "",
         "hide": 0,
@@ -2292,8 +2292,8 @@
       {
         "current": {
           "selected": false,
-          "text": "prometheus-indumia",
-          "value": "edgqy5chqp4aod"
+          "text": "Prometheus",
+          "value": "prometheus"
         },
         "hide": 0,
         "includeAll": false,
@@ -2313,7 +2313,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS-INDUMIA}"
+          "uid": "${datasourceprometheus}"
         },
         "definition": "label_values(up{job=~\"caddy.*\"},instance)",
         "hide": 0,
@@ -2338,7 +2338,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS-INDUMIA}"
+          "uid": "${datasourceprometheus}"
         },
         "definition": "label_values({__name__=~\"^caddy.*\", handler=~\".*\"},handler)",
         "hide": 0,

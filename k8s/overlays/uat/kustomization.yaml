@@ -152,7 +152,14 @@ patches:
         value: Always
   - target:
       kind: Deployment
-      name: cce-compliance-service
+      name: cce-protocol-service
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: Deployment
+      name: cce-matcher-service
     patch: |
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
@@ -180,7 +187,7 @@ patches:
         value: Always
   - target:
       kind: Deployment
-      name: cce-scheduler-service
+      name: cce-step-sla-service
     patch: |
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
@@ -204,8 +211,11 @@ images:
   - name: ghcr.io/openphc/cce-collector-service
     newName: ghcr.io/openphc/cce-collector-service
     newTag: latest
-  - name: ghcr.io/openphc/cce-compliance-service
-    newName: ghcr.io/openphc/cce-compliance-service
+  - name: ghcr.io/openphc/cce-protocol-service
+    newName: ghcr.io/openphc/cce-protocol-service
+    newTag: latest
+  - name: ghcr.io/openphc/cce-matcher-service
+    newName: ghcr.io/openphc/cce-matcher-service
     newTag: latest
   - name: ghcr.io/openphc/cce-intelligence-service
     newName: ghcr.io/openphc/cce-intelligence-service
@@ -216,14 +226,17 @@ images:
   - name: ghcr.io/openphc/openhim-cce-emitter-adaptor
     newName: ghcr.io/openphc/openhim-cce-emitter-adaptor
     newTag: latest
+  # Insights: demo-rw-latest is built from the insights repos' demo-rw branch. For CCE 2.0 that branch
+  # carries demo-rw-v2 (2.0 ClickHouse schema: matcher_event_logs, step_status / sla_status); a 1.x
+  # build cannot read the 2.0 ClickHouse.
   - name: ghcr.io/openphc/cce-insights-service
     newName: ghcr.io/openphc/cce-insights-service
     newTag: demo-rw-latest
   - name: ghcr.io/openphc/cce-insights-ui
     newName: ghcr.io/openphc/cce-insights-ui
     newTag: demo-rw-latest
-  - name: ghcr.io/openphc/cce-scheduler-service
-    newName: ghcr.io/openphc/cce-scheduler-service
+  - name: ghcr.io/openphc/cce-step-sla-service
+    newName: ghcr.io/openphc/cce-step-sla-service
     newTag: latest
 
 commonLabels:
