@@ -95,7 +95,10 @@ services:
       KC_HTTP_ENABLED: ${KC_HTTP_ENABLED}
     command: start
     volumes:
-      - ./keycloak-themes/insights-ui-theme:/opt/keycloak/themes/insights-ui-theme:ro
+      # Dev uses the unbranded cce-insights-theme/dev, mounted under the theme name the realm already
+      # selects (insights-ui-theme), so no realm change is needed. Rwanda (deploy-scripts-rw / k8s)
+      # keeps the branded keycloak-themes/insights-ui-theme. Restart keycloak after changing it.
+      - ./keycloak-themes/cce-insights-theme/dev:/opt/keycloak/themes/insights-ui-theme:ro
     networks:
       - cce-net
 
@@ -1006,7 +1009,7 @@ services:
       VITE_KEYCLOAK_CLIENT_ID: ${UI_KEYCLOAK_CLIENT_ID:-cce-insights-ui}
       VITE_API_BASE_URL: ${UI_API_BASE_URL:-}
       VITE_POLLING_INTERVAL: ${UI_POLLING_INTERVAL:-60000}
-      VITE_DEFAULT_DATE_RANGE_DAYS: ${UI_DEFAULT_DATE_RANGE_DAYS:-30}
+      VITE_DEFAULT_DATE_RANGE_DAYS: ${UI_DEFAULT_DATE_RANGE_DAYS:-90}
     depends_on:
       - gateway-service
     healthcheck:
