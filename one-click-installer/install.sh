@@ -38,9 +38,12 @@ confirm() { if [ -n "${ASSUME_YES:-}" ]; then echo "$1 [y/N] y  (--yes)"; return
 phase() { echo; echo "████ $*"; }
 
 # repo assets the deploy needs (a partial copy of the repo was a real failure mode: keycloak-themes/ missing -> no IdP)
-for d in k8s/base "k8s/overlays/$OVERLAY_TEMPLATE" data-pipeline/schema keycloak-themes/insights-ui-theme; do
+for d in k8s/base "k8s/overlays/$OVERLAY_TEMPLATE" data-pipeline/schema; do
   [ -e "$REPO/$d" ] || { echo "ERROR: $REPO/$d is missing — copy the whole repository (see README: 'Getting the code onto the machine')"; exit 1; }
 done
+export KEYCLOAK_THEME_DIR="${KEYCLOAK_THEME_DIR:-keycloak-themes/cce-insights-theme/dev}"
+THEME_PATH="$KEYCLOAK_THEME_DIR"; [ "${THEME_PATH#/}" = "$THEME_PATH" ] && THEME_PATH="$REPO/$THEME_PATH"
+[ -r "$THEME_PATH/login/theme.properties" ] || { echo "ERROR: KEYCLOAK_THEME_DIR=$KEYCLOAK_THEME_DIR has no login/theme.properties — keycloak would have no login page"; exit 1; }
 
 cat <<SUMMARY
 
@@ -51,6 +54,8 @@ cat <<SUMMARY
  Ingress:            ${INGRESS_HOST:-<none — plain HTTP>}
  Hosting:            $( [ "$IS_CLOUD_DEPLOYMENT" = true ] && echo "cloud (provider firewall is the perimeter; UFW not configured)" || echo "on-prem / direct (UFW host firewall WILL be configured)")
  Infisical:          $( [ "${USE_LOCAL_INFISICAL:-false}" = true ] && echo "local, self-contained (127.0.0.1:8080)" || echo "${INFISICAL_DOMAIN:-http://localhost:8080}")
+ Login theme:        $KEYCLOAK_THEME_DIR
+ Data pipeline:      $( [ -n "${DATA_PIPELINE_REF:-}" ] && echo "${DATA_PIPELINE_REPO:-https://github.com/openphc/cce-data-pipeline.git} @ $DATA_PIPELINE_REF" || echo "vendored data-pipeline/ in this repo")
  Versions:           k3s ${K3S_VERSION:-default}  ClickHouse ${CLICKHOUSE_VERSION:-26.5}  Postgres ${POSTGRES_VERSION:-16}  Kafka ${KAFKA_VERSION:-3.7.0}
  Creds dir:          $CREDS_DIR
 ════════════════════════════════════════════════════════════════
@@ -85,11 +90,12 @@ SEED_TMP="$(mktemp)"; trap 'rm -f "$SEED_TMP"' EXIT
 [ -n "${ACME_EMAIL:-}" ]   && ! grep -q '^ACME_EMAIL=' "$SEED_TMP"   && echo "ACME_EMAIL=${ACME_EMAIL}"     >> "$SEED_TMP"
 bash "$LIB/infisical-run.sh" "$ENVCODE" bash "$LIB/infisical-seed.sh" "$ENVCODE" "$SEED_TMP"
 
-phase "4/7 Kubernetes overlay k8s/overlays/$OVERLAY_NAME + image versions"
+phase "4/7 Kubernetes overlay k8s/overlays/$OVERLAY_NAME + image versions + data pipeline version"
 if [ -d "$OVERLAY" ]; then echo "  exists — reusing (delete it to regenerate from '$OVERLAY_TEMPLATE')"
 else bash "$LIB/generate-overlay.sh" "$ENVCODE"; fi
 echo "  image versions (from the config):"
 bash "$LIB/apply-image-pins.sh" "$ENVCODE"
+bash "$LIB/sync-data-pipeline.sh"
 
 phase "5/7 Pre-flight: every overlay variable has a value + dry render (nothing applied yet)"
 bash "$LIB/infisical-run.sh" "$ENVCODE" bash "$LIB/overlay-vars-check.sh" "$ENVCODE" \

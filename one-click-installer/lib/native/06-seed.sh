@@ -54,6 +54,12 @@ else
     --data-binary @"$REPO/k8s/seeds/cce-realm.json")
   echo "  realm import HTTP=$code"
 fi
+# Select the login theme. cce-realm.json names none, so the mounted theme (05-k8s-deploy.sh: KEYCLOAK_THEME_DIR, mounted as
+# "insights-ui-theme") was never used and every fresh install showed Keycloak's stock page. PUT is a partial update — only
+# loginTheme changes. Re-run safe.
+code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' \
+  -X PUT "$KC/admin/realms/cce" -d '{"loginTheme":"insights-ui-theme"}')
+echo "  login theme insights-ui-theme (from ${KEYCLOAK_THEME_DIR:-keycloak-themes/cce-insights-theme/dev}) HTTP=$code"
 
 echo "=== [$ENVCODE 3/3] clinical protocol (optional — PROTOCOL_FILE + PROTOCOL_LOAD_URL in the config) ==="
 # The protocol-service endpoint (2.0; /v1/compliance/** in 1.x) expects {"planDefinitionJson": "<stringified PlanDefinition>"},

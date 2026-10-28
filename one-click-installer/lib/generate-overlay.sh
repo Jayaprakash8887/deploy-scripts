@@ -87,6 +87,32 @@ else:
     print("  removed node-exporter patch block")
 PY
 
+echo "[generate-overlay] collector: let Flyway baseline a non-empty schema (fresh installs)"
+python3 - "$DST/kustomization.yaml" <<'PY'
+import sys
+path = sys.argv[1]
+text = open(path).read()
+# Every 2.0 service migrates the SAME ccedb public schema. Protocol/Matcher/intelligence set baseline-on-migrate, the collector's
+# manifest does not (its image defaults to false). On a fresh database whichever service migrates first wins, and when it is not
+# the collector it crash-loops forever: "Found non-empty schema(s) "public" but no schema history table". Upgraded environments
+# never see this (their history table already exists, where these settings are inert). Baseline 0 = still run V1/V2.
+# docker-compose.yml sets the same for dev.
+patch = (
+    "  # Fresh-install fix (one-click-installer): see generate-overlay.sh.\n"
+    "  - target: { kind: Deployment, name: cce-collector-service }\n"
+    "    patch: |\n"
+    "      - {op: add, path: /spec/template/spec/containers/0/env/-, value: {name: SPRING_FLYWAY_BASELINE_ON_MIGRATE, value: \"true\"}}\n"
+    "      - {op: add, path: /spec/template/spec/containers/0/env/-, value: {name: SPRING_FLYWAY_BASELINE_VERSION, value: \"0\"}}\n"
+)
+if "SPRING_FLYWAY_BASELINE_ON_MIGRATE" in text:
+    print("  already present")
+elif "\npatches:\n" in text:
+    open(path, "w").write(text.replace("\npatches:\n", "\npatches:\n" + patch, 1))
+    print("  added collector Flyway baseline patch")
+else:
+    print("WARNING: no top-level 'patches:' in %s — collector Flyway patch NOT added" % path, file=sys.stderr)
+PY
+
 echo ""
 echo "[generate-overlay] done. Review with:"
 echo "  diff -u $SRC/kustomization.yaml $DST/kustomization.yaml"

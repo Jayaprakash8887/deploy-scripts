@@ -49,7 +49,7 @@ done
 
 sect "tools"
 need_pkgs=()
-for pair in envsubst:gettext-base curl:curl python3:python3 gpg:gnupg ; do
+for pair in envsubst:gettext-base curl:curl python3:python3 gpg:gnupg git:git ; do
   cmd="${pair%%:*}"; pkg="${pair##*:}"
   command -v "$cmd" >/dev/null 2>&1 && ok "$cmd" || { note "$cmd missing (apt: $pkg)"; need_pkgs+=("$pkg"); }
 done

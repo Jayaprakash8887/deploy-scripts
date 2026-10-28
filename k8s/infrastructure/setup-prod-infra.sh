@@ -110,10 +110,15 @@ if [ ! -d "${KAFKA_HOME}" ]; then
     KAFKA_TGZ="/tmp/${KAFKA_TARBALL}"
     KAFKA_OK=""
     for base in "${KAFKA_MIRRORS[@]}"; do
+        # Checksum first (tiny): a tarball already in /tmp that matches it is reused — archive.apache.org can take 20+ minutes.
+        wget -q "${base}/${KAFKA_TARBALL}.sha512" -O "${KAFKA_TGZ}.sha512" || { echo "  (not available at ${base})"; rm -f "${KAFKA_TGZ}.sha512"; continue; }
+        # Kafka's .sha512 is "<file>: AB12 CD34 …" (upper-case, space/newline-grouped). Normalise to a bare lowercase hex digest.
+        expected="$(sed 's/^[^:]*://' "${KAFKA_TGZ}.sha512" | tr -d ' \n\r' | tr 'A-F' 'a-f')"
+        if [ -s "${KAFKA_TGZ}" ] && [ -n "${expected}" ] && [ "$(sha512sum "${KAFKA_TGZ}" | cut -d' ' -f1)" = "${expected}" ]; then
+            KAFKA_OK=1; echo "  reusing ${KAFKA_TGZ} (SHA-512 verified)"; break
+        fi
         echo "  Downloading Kafka from ${base}/${KAFKA_TARBALL}..."
-        if wget -q "${base}/${KAFKA_TARBALL}" -O "${KAFKA_TGZ}" && wget -q "${base}/${KAFKA_TARBALL}.sha512" -O "${KAFKA_TGZ}.sha512"; then
-            # Kafka's .sha512 is "<file>: AB12 CD34 …" (upper-case, space/newline-grouped). Normalise to a bare lowercase hex digest.
-            expected="$(sed 's/^[^:]*://' "${KAFKA_TGZ}.sha512" | tr -d ' \n\r' | tr 'A-F' 'a-f')"
+        if wget -q "${base}/${KAFKA_TARBALL}" -O "${KAFKA_TGZ}"; then
             actual="$(sha512sum "${KAFKA_TGZ}" | cut -d' ' -f1)"
             if [ -n "${expected}" ] && [ "${expected}" = "${actual}" ]; then KAFKA_OK=1; echo "  SHA-512 verified"; break; fi
             echo "  !! checksum MISMATCH from ${base} (expected ${expected:0:16}…, got ${actual:0:16}…) — trying next mirror"

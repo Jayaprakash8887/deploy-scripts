@@ -57,8 +57,7 @@ if [ "$PULL_IMAGES" = 1 ]; then
   bash "$HERE/../redeploy.sh" "$NS"
 fi
 
-echo "########## 5. Wait for the CCE services to create the ccedb schema ##########"
-sleep 30
+echo "########## 5. ccedb schema: created by the CCE services — 04-data-pipeline.sh waits for every CDC table ##########"
 
 echo "########## 6. Data pipeline: ClickHouse schema + CDC + Debezium connector ##########"
 bash "$HERE/04-data-pipeline.sh" "$ENVCODE"

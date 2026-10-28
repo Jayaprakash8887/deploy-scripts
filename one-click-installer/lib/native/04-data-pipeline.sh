@@ -97,6 +97,26 @@ sys.exit(1 if failed else 0)
 PY
 
 echo "=== [$ENVCODE 2/4] PostgreSQL logical replication (native, as postgres superuser) ==="
+# The CDC tables are created by the CCE services' own migrations, so wait for them — a fixed sleep was enough only while the
+# images were already cached; on a genuinely fresh machine the pods were still pulling images, every ALTER/PUBLICATION hit
+# "relation does not exist" and the connector came up FAILED. The list is read from the CDC SQL itself, so it tracks the schema.
+CDC_TABLES="$(grep -o -E '^ALTER TABLE +[a-z_]+ +REPLICA IDENTITY' "$DP/cdc/01-configure-replication.sql" | awk '{print $3}' | sort -u)"
+WAIT_SECS="${CDC_TABLE_WAIT_SECS:-1200}"; waited=0
+while :; do
+  missing=""
+  for t in $CDC_TABLES; do
+    [ "$(sudo -u postgres psql -d "$PG_DB" -tAc "SELECT to_regclass('public.$t') IS NOT NULL")" = t ] || missing="$missing $t"
+  done
+  [ -z "$missing" ] && { echo "  all $(echo $CDC_TABLES | wc -w) CDC tables present (waited ${waited}s)"; break; }
+  if [ "$waited" -ge "$WAIT_SECS" ]; then
+    echo "  ✗ after ${WAIT_SECS}s these tables still do not exist:$missing"
+    echo "    The services that own them have not finished starting — check: ${KUBECTL:-sudo k3s kubectl} get pods -n cce-$ENVCODE"
+    exit 1
+  fi
+  [ $((waited % 60)) -eq 0 ] && echo "  waiting for the CCE services to create:$missing"
+  sleep 15; waited=$((waited + 15))
+done
+
 # ALTER SYSTEM (wal_level etc.) requires superuser; the app role is not one.
 # Feed the file on STDIN, not `-f <path>`: psql runs as the postgres user, which cannot read a repo that lives under a home
 # directory (Ubuntu 26.04 homes are mode 750 — "Permission denied" and the whole CDC setup aborted). The redirect is done by
@@ -127,6 +147,8 @@ NAME="$(printf '%s' "$PAYLOAD" | python3 -c 'import sys,json;print(json.load(sys
 if curl -sf "$CONNECT_URL/connectors/$NAME" >/dev/null 2>&1; then
   printf '%s' "$PAYLOAD" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["config"]))' \
     | curl -sf -X PUT -H 'Content-Type: application/json' "$CONNECT_URL/connectors/$NAME/config" -d @- >/dev/null && echo "  updated $NAME"
+  # a re-run after a failed first attempt: a config PUT does not revive a FAILED connector/task, a restart does
+  curl -sf -X POST "$CONNECT_URL/connectors/$NAME/restart?includeTasks=true&onlyFailed=true" >/dev/null 2>&1 && echo "  restarted any failed $NAME tasks"
 else
   printf '%s' "$PAYLOAD" | curl -sf -X POST -H 'Content-Type: application/json' "$CONNECT_URL/connectors" -d @- >/dev/null && echo "  created $NAME"
 fi

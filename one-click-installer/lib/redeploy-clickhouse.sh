@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# one-click-installer/lib/redeploy-clickhouse.sh <uat|prod> [schema-basename ...]
+# one-click-installer/lib/redeploy-clickhouse.sh <envcode> [schema-basename ...]
 #
 # The ClickHouse counterpart of one-click-installer/lib/redeploy.sh (which rolls the k8s services): (re)apply the
 # data-pipeline ClickHouse schema (data-pipeline/schema/*.sql) over HTTP and force-refresh any
@@ -8,10 +8,10 @@
 #
 # Schema-only: this does NOT re-snapshot data from Postgres. CREATE is additive (won't alter an
 # existing object) — to REPLACE a changed table/MV pass DROP_FIRST, and for a full rebuild
-# (drop DB + re-snapshot) see BACKUP-RESTORE.md §5.
+# (drop DB + re-snapshot from Postgres) is a separate procedure — this script never moves data.
 #
-#   sudo bash rw/<env>/redeploy-clickhouse.sh                 # apply all schema/*.sql (sorted) + refresh MVs
-#   sudo bash rw/<env>/redeploy-clickhouse.sh 08-reference-tables 07-daily-summary-aggregates
+#   sudo bash one-click-installer/lib/redeploy-clickhouse.sh <env>   # apply all schema/*.sql (sorted) + refresh MVs
+#   sudo bash one-click-installer/lib/redeploy-clickhouse.sh <env> 08-reference-tables 07-daily-summary-aggregates
 #                                                             # explicit order (a file needs a higher-numbered one)
 #   DRY_RUN=1 ...        # preview files + statement counts + MVs to refresh; change nothing
 #   REFRESH_MV=0 ...     # skip the post-apply SYSTEM REFRESH of refreshable MVs
@@ -20,7 +20,7 @@
 # Creds (CLICKHOUSE_USER/PASSWORD/HOST/PORT) are pulled from Infisical. Run on the host.
 set -euo pipefail
 
-ENVNAME="${1:?usage: redeploy-clickhouse.sh <uat|prod> [schema-basename ...]}"; shift || true
+ENVNAME="${1:?usage: redeploy-clickhouse.sh <envcode> [schema-basename ...]}"; shift || true
 DRY_RUN="${DRY_RUN:-}"
 REFRESH_MV="${REFRESH_MV:-1}"
 DROP_FIRST="${DROP_FIRST:-}"
