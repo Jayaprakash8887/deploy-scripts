@@ -16,13 +16,13 @@ echo ""
 # --- Configuration ---
 # POSTGRES_DB/POSTGRES_USER are a fixed platform convention (same on every environment) —
 # overridable via env for flexibility, but not meant to vary per env in practice.
-POSTGRES_VERSION=16
+POSTGRES_VERSION="${POSTGRES_VERSION:-16}"   # overridable (one-click config)
 POSTGRES_DB="${POSTGRES_DB:-ccedb}"
 POSTGRES_USER="${POSTGRES_USER:-admin}"
 POSTGRES_PASSWORD="${POSTGRES_PROD_PASSWORD:?set POSTGRES_PROD_PASSWORD in the environment}"
 POSTGRES_PORT=5432
 
-KAFKA_VERSION="3.7.0"
+KAFKA_VERSION="${KAFKA_VERSION:-3.7.0}"   # overridable (one-click config)
 KAFKA_SCALA_VERSION="2.13"
 KAFKA_PORT=9092
 KAFKA_CONTROLLER_PORT=9094
@@ -42,7 +42,7 @@ if ! command -v psql &>/dev/null; then
     sudo apt-get install -y -qq gnupg2 lsb-release
     echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | \
         sudo tee /etc/apt/sources.list.d/pgdg.list
-    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/postgresql.gpg
     sudo apt-get update -qq
     sudo apt-get install -y -qq postgresql-${POSTGRES_VERSION}
     echo "  PostgreSQL ${POSTGRES_VERSION} installed."
@@ -99,10 +99,31 @@ fi
 # Download and install Kafka
 if [ ! -d "${KAFKA_HOME}" ]; then
     KAFKA_TARBALL="kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz"
-    KAFKA_URL="https://downloads.apache.org/kafka/${KAFKA_VERSION}/${KAFKA_TARBALL}"
-
-    echo "  Downloading Kafka from ${KAFKA_URL}..."
-    wget -q "${KAFKA_URL}" -O "/tmp/${KAFKA_TARBALL}"
+    # downloads.apache.org (and dlcdn) only host CURRENT releases: once a newer Kafka ships, ${KAFKA_VERSION} is moved off them and
+    # the old URL 404s — wget exit 8 — which silently broke every fresh install after 3.7.0 stopped being current. archive.apache.org
+    # is permanent, so try it first; the others are fallbacks (they serve the newest release fastest).
+    KAFKA_MIRRORS=(
+        "https://archive.apache.org/dist/kafka/${KAFKA_VERSION}"
+        "https://downloads.apache.org/kafka/${KAFKA_VERSION}"
+        "https://dlcdn.apache.org/kafka/${KAFKA_VERSION}"
+    )
+    KAFKA_TGZ="/tmp/${KAFKA_TARBALL}"
+    KAFKA_OK=""
+    for base in "${KAFKA_MIRRORS[@]}"; do
+        echo "  Downloading Kafka from ${base}/${KAFKA_TARBALL}..."
+        if wget -q "${base}/${KAFKA_TARBALL}" -O "${KAFKA_TGZ}" && wget -q "${base}/${KAFKA_TARBALL}.sha512" -O "${KAFKA_TGZ}.sha512"; then
+            # Kafka's .sha512 is "<file>: AB12 CD34 …" (upper-case, space/newline-grouped). Normalise to a bare lowercase hex digest.
+            expected="$(sed 's/^[^:]*://' "${KAFKA_TGZ}.sha512" | tr -d ' \n\r' | tr 'A-F' 'a-f')"
+            actual="$(sha512sum "${KAFKA_TGZ}" | cut -d' ' -f1)"
+            if [ -n "${expected}" ] && [ "${expected}" = "${actual}" ]; then KAFKA_OK=1; echo "  SHA-512 verified"; break; fi
+            echo "  !! checksum MISMATCH from ${base} (expected ${expected:0:16}…, got ${actual:0:16}…) — trying next mirror"
+        else
+            echo "  (not available at ${base})"
+        fi
+        rm -f "${KAFKA_TGZ}" "${KAFKA_TGZ}.sha512"
+    done
+    [ -n "${KAFKA_OK}" ] || { echo "ERROR: could not download a verified Kafka ${KAFKA_VERSION} from any mirror"; exit 1; }
+    rm -f "${KAFKA_TGZ}.sha512"
     sudo mkdir -p "${KAFKA_HOME}"
     sudo tar -xzf "/tmp/${KAFKA_TARBALL}" -C "${KAFKA_HOME}" --strip-components=1
     rm -f "/tmp/${KAFKA_TARBALL}"
