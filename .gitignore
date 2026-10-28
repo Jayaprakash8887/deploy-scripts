@@ -15,4 +15,4 @@ remote-deployment/
 rw/
 .claude/
 
-scripts/
+scripts/*
