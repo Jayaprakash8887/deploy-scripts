@@ -14,3 +14,5 @@ remote-deployment/
 # RW-specific deployment scripts/data — not for the shared repo
 rw/
 .claude/
+
+scripts/
