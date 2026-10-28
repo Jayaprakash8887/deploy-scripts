@@ -6,7 +6,6 @@ namespace: cce-prod
 resources:
   - ../../base
   - namespace.yaml
-  - scheduler-hpa.yaml
   - cce-hpas.yaml
   - ratelimit.yaml
 
@@ -47,6 +46,23 @@ configMapGenerator:
       - ALLOWED_ORIGINS=${GATEWAY_ALLOWED_ORIGINS}
       - BASIC_AUTH_ENABLED=${BASIC_AUTH_ENABLED}
       - BASIC_AUTH_CLIENT_ID=${BASIC_AUTH_CLIENT_ID}
+      # cce-intelligence-service (RI-63) — SMTP host/port only; credentials and recipients are
+      # in cce-secrets below since they identify real people. Set in Infisical.
+      - CCE_INTELLIGENCE_SMTP_HOST=${CCE_INTELLIGENCE_SMTP_HOST}
+      - CCE_INTELLIGENCE_SMTP_PORT=${CCE_INTELLIGENCE_SMTP_PORT}
+      # Escalation-timing — required, no default, wired as a plain passthrough like the
+      # recipients in cce-secrets below: a missing one isn't checked here (deploy-prod.sh's
+      # comment on this explains why), it fails with a precise error from the app itself once
+      # the pod starts (Spring's own numeric binding for these). Set in Infisical.
+      - CCE_OPSALERT_TIER1_THRESHOLD_MINUTES=${CCE_OPSALERT_TIER1_THRESHOLD_MINUTES}
+      - CCE_OPSALERT_TIER2_THRESHOLD_MINUTES=${CCE_OPSALERT_TIER2_THRESHOLD_MINUTES}
+      - CCE_OPSALERT_TIER3_THRESHOLD_MINUTES=${CCE_OPSALERT_TIER3_THRESHOLD_MINUTES}
+      # Kill switch on delivery only — required, no default, wired exactly like the thresholds
+      # above. Set in Infisical.
+      - CCE_OPSALERT_NOTIFICATIONS_ENABLED=${CCE_OPSALERT_NOTIFICATIONS_ENABLED}
+      # Resends the last tier's email daily once escalation reaches it — required, no default,
+      # wired exactly like the kill switch above. Set in Infisical.
+      - CCE_OPSALERT_REPEAT_INTERVAL_MINUTES=${CCE_OPSALERT_REPEAT_INTERVAL_MINUTES}
 
 secretGenerator:
   - name: cce-secrets
@@ -65,6 +81,23 @@ secretGenerator:
       - CLICKHOUSE_USER=${CLICKHOUSE_USER}
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
       - BASIC_AUTH_CLIENT_SECRET=${BASIC_AUTH_CLIENT_SECRET}
+      # cce-intelligence-service (RI-63) — SMTP credentials + tier recipients. Recipients are
+      # here rather than in cce-config since they're real people's names/addresses, not
+      # structural config. Required, no default on the app side — a missing one fails that
+      # pod's startup with a clear error naming exactly which. Set in Infisical.
+      - CCE_INTELLIGENCE_SMTP_USERNAME=${CCE_INTELLIGENCE_SMTP_USERNAME}
+      - CCE_INTELLIGENCE_SMTP_PASSWORD=${CCE_INTELLIGENCE_SMTP_PASSWORD}
+      - CCE_INTELLIGENCE_ALERT_EMAIL_TIER1=${CCE_INTELLIGENCE_ALERT_EMAIL_TIER1}
+      - CCE_INTELLIGENCE_ALERT_NAME_TIER1=${CCE_INTELLIGENCE_ALERT_NAME_TIER1}
+      - CCE_INTELLIGENCE_ALERT_EMAIL_TIER2=${CCE_INTELLIGENCE_ALERT_EMAIL_TIER2}
+      - CCE_INTELLIGENCE_ALERT_NAME_TIER2=${CCE_INTELLIGENCE_ALERT_NAME_TIER2}
+      - CCE_INTELLIGENCE_ALERT_EMAIL_TIER3=${CCE_INTELLIGENCE_ALERT_EMAIL_TIER3}
+      - CCE_INTELLIGENCE_ALERT_NAME_TIER3=${CCE_INTELLIGENCE_ALERT_NAME_TIER3}
+      # Tier Cc — optional, comma-separated for more than one address per tier. Safe as a plain
+      # passthrough for all three: every tier's app-level default is the same, empty.
+      - CCE_OPSALERT_TIER1_CC=${CCE_OPSALERT_TIER1_CC}
+      - CCE_OPSALERT_TIER2_CC=${CCE_OPSALERT_TIER2_CC}
+      - CCE_OPSALERT_TIER3_CC=${CCE_OPSALERT_TIER3_CC}
 
 generatorOptions:
   disableNameSuffixHash: true
@@ -112,11 +145,12 @@ patches:
         value:
           - hosts: [ "${INGRESS_HOST}" ]
   # Vertical scaling (2026-06-18): compliance 6x; insights-ui + scheduler 4x; rest 3x — over the
+  # base requests/limits. CCE 2.0.0: Matcher takes compliance's sizing; Protocol and Step SLA keep
+  # their base sizing (the scheduler's leader-elected setup is gone with it). Over the
   # base requests/limits. Requires the raised ResourceQuota in namespace.yaml. imagePullPolicy is
   # input-driven (${IMAGE_PULL_POLICY}, from Infisical /platform, default "Always") on every CCE
   # service rather than hardcoded — 2026-07-22: lets an operator pin to IfNotPresent (e.g. to force
   # a redeploy onto an exact prior digest without risking an unwanted mutable-tag pull mid-incident).
-  # NOTE: cce-scheduler-service is leader-elected — see strategy note below.
   - target:
       kind: Deployment
       name: cce-collector-service
@@ -128,7 +162,7 @@ patches:
       - {op: replace, path: /spec/template/spec/containers/0/resources/limits/memory, value: "2304Mi"}
   - target:
       kind: Deployment
-      name: cce-compliance-service
+      name: cce-matcher-service
     patch: |
       - {op: add, path: /spec/template/spec/containers/0/imagePullPolicy, value: ${IMAGE_PULL_POLICY}}
       - {op: replace, path: /spec/template/spec/containers/0/resources/requests/cpu, value: "600m"}
@@ -153,44 +187,16 @@ patches:
       - {op: replace, path: /spec/template/spec/containers/0/resources/requests/memory, value: "768Mi"}
       - {op: replace, path: /spec/template/spec/containers/0/resources/limits/cpu, value: "3"}
       - {op: replace, path: /spec/template/spec/containers/0/resources/limits/memory, value: "1536Mi"}
-  # Scheduler: greedy partitioned leader-election (HA). 3 replicas (managed by scheduler-hpa.yaml)
-  # = 1 active leader (owns the partitions) + hot standbys that take over on failure.
-  # SCHEDULER_TOTAL_PARTITIONS=3 parallelizes work within the active leader. CRITICAL: probes MUST
-  # use the dedicated liveness/readiness endpoints — the aggregate /actuator/health returns 503 on
-  # a standby (leadership indicator DOWN), which would liveness-kill standbys into a crashloop.
-  # maxSurge=0/maxUnavailable=1 avoids a partition-less surge pod. Strategic-merge (merges env by name).
-  - patch: |
-      apiVersion: apps/v1
+  - target:
       kind: Deployment
-      metadata:
-        name: cce-scheduler-service
-      spec:
-        strategy:
-          type: RollingUpdate
-          rollingUpdate:
-            maxSurge: 0
-            maxUnavailable: 1
-        template:
-          spec:
-            containers:
-              - name: cce-scheduler-service
-                imagePullPolicy: ${IMAGE_PULL_POLICY}
-                env:
-                  - name: SCHEDULER_TOTAL_PARTITIONS
-                    value: "3"
-                livenessProbe:
-                  httpGet:
-                    path: /actuator/health/liveness
-                readinessProbe:
-                  httpGet:
-                    path: /actuator/health/readiness
-                resources:
-                  requests:
-                    cpu: 400m
-                    memory: 1Gi
-                  limits:
-                    cpu: "2"
-                    memory: 3Gi
+      name: cce-protocol-service
+    patch: |
+      - {op: add, path: /spec/template/spec/containers/0/imagePullPolicy, value: ${IMAGE_PULL_POLICY}}
+  - target:
+      kind: Deployment
+      name: cce-step-sla-service
+    patch: |
+      - {op: add, path: /spec/template/spec/containers/0/imagePullPolicy, value: ${IMAGE_PULL_POLICY}}
   - target:
       kind: Deployment
       name: openhim-emitter-adaptor
@@ -239,8 +245,11 @@ images:
   - name: ghcr.io/openphc/cce-collector-service
     newName: ghcr.io/openphc/cce-collector-service
     newTag: latest
-  - name: ghcr.io/openphc/cce-compliance-service
-    newName: ghcr.io/openphc/cce-compliance-service
+  - name: ghcr.io/openphc/cce-protocol-service
+    newName: ghcr.io/openphc/cce-protocol-service
+    newTag: latest
+  - name: ghcr.io/openphc/cce-matcher-service
+    newName: ghcr.io/openphc/cce-matcher-service
     newTag: latest
   - name: ghcr.io/openphc/cce-intelligence-service
     newName: ghcr.io/openphc/cce-intelligence-service
@@ -251,14 +260,17 @@ images:
   - name: ghcr.io/openphc/openhim-cce-emitter-adaptor
     newName: ghcr.io/openphc/openhim-cce-emitter-adaptor
     newTag: latest
+  # Insights: demo-rw-latest is built from the insights repos' demo-rw branch. For CCE 2.0 that branch
+  # carries demo-rw-v2 (2.0 ClickHouse schema: matcher_event_logs, step_status / sla_status); a 1.x
+  # build cannot read the 2.0 ClickHouse.
   - name: ghcr.io/openphc/cce-insights-service
     newName: ghcr.io/openphc/cce-insights-service
     newTag: demo-rw-latest
   - name: ghcr.io/openphc/cce-insights-ui
     newName: ghcr.io/openphc/cce-insights-ui
     newTag: demo-rw-latest
-  - name: ghcr.io/openphc/cce-scheduler-service
-    newName: ghcr.io/openphc/cce-scheduler-service
+  - name: ghcr.io/openphc/cce-step-sla-service
+    newName: ghcr.io/openphc/cce-step-sla-service
     newTag: latest
 
 commonLabels:

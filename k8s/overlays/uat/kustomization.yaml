@@ -45,6 +45,23 @@ configMapGenerator:
       - ALLOWED_ORIGINS=${GATEWAY_ALLOWED_ORIGINS}
       - BASIC_AUTH_ENABLED=${BASIC_AUTH_ENABLED}
       - BASIC_AUTH_CLIENT_ID=${BASIC_AUTH_CLIENT_ID}
+      # cce-intelligence-service (RI-63) — SMTP host/port only; credentials and recipients are
+      # in cce-secrets below since they identify real people. Set in Infisical.
+      - CCE_INTELLIGENCE_SMTP_HOST=${CCE_INTELLIGENCE_SMTP_HOST}
+      - CCE_INTELLIGENCE_SMTP_PORT=${CCE_INTELLIGENCE_SMTP_PORT}
+      # Escalation-timing — required, no default, wired as a plain passthrough like the
+      # recipients in cce-secrets below: a missing one isn't checked here (deploy-uat.sh's
+      # comment on this explains why), it fails with a precise error from the app itself once
+      # the pod starts (Spring's own numeric binding for these). Set in Infisical.
+      - CCE_OPSALERT_TIER1_THRESHOLD_MINUTES=${CCE_OPSALERT_TIER1_THRESHOLD_MINUTES}
+      - CCE_OPSALERT_TIER2_THRESHOLD_MINUTES=${CCE_OPSALERT_TIER2_THRESHOLD_MINUTES}
+      - CCE_OPSALERT_TIER3_THRESHOLD_MINUTES=${CCE_OPSALERT_TIER3_THRESHOLD_MINUTES}
+      # Kill switch on delivery only — required, no default, wired exactly like the thresholds
+      # above. Set in Infisical.
+      - CCE_OPSALERT_NOTIFICATIONS_ENABLED=${CCE_OPSALERT_NOTIFICATIONS_ENABLED}
+      # Resends the last tier's email daily once escalation reaches it — required, no default,
+      # wired exactly like the kill switch above. Set in Infisical.
+      - CCE_OPSALERT_REPEAT_INTERVAL_MINUTES=${CCE_OPSALERT_REPEAT_INTERVAL_MINUTES}
 
 secretGenerator:
   - name: cce-secrets
@@ -63,6 +80,23 @@ secretGenerator:
       - CLICKHOUSE_USER=${CLICKHOUSE_USER}
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
       - BASIC_AUTH_CLIENT_SECRET=${BASIC_AUTH_CLIENT_SECRET}
+      # cce-intelligence-service (RI-63) — SMTP credentials + tier recipients. Recipients are
+      # here rather than in cce-config since they're real people's names/addresses, not
+      # structural config. Required, no default on the app side — a missing one fails that
+      # pod's startup with a clear error naming exactly which. Set in Infisical.
+      - CCE_INTELLIGENCE_SMTP_USERNAME=${CCE_INTELLIGENCE_SMTP_USERNAME}
+      - CCE_INTELLIGENCE_SMTP_PASSWORD=${CCE_INTELLIGENCE_SMTP_PASSWORD}
+      - CCE_INTELLIGENCE_ALERT_EMAIL_TIER1=${CCE_INTELLIGENCE_ALERT_EMAIL_TIER1}
+      - CCE_INTELLIGENCE_ALERT_NAME_TIER1=${CCE_INTELLIGENCE_ALERT_NAME_TIER1}
+      - CCE_INTELLIGENCE_ALERT_EMAIL_TIER2=${CCE_INTELLIGENCE_ALERT_EMAIL_TIER2}
+      - CCE_INTELLIGENCE_ALERT_NAME_TIER2=${CCE_INTELLIGENCE_ALERT_NAME_TIER2}
+      - CCE_INTELLIGENCE_ALERT_EMAIL_TIER3=${CCE_INTELLIGENCE_ALERT_EMAIL_TIER3}
+      - CCE_INTELLIGENCE_ALERT_NAME_TIER3=${CCE_INTELLIGENCE_ALERT_NAME_TIER3}
+      # Tier Cc — optional, comma-separated for more than one address per tier. Safe as a plain
+      # passthrough for all three: every tier's app-level default is the same, empty.
+      - CCE_OPSALERT_TIER1_CC=${CCE_OPSALERT_TIER1_CC}
+      - CCE_OPSALERT_TIER2_CC=${CCE_OPSALERT_TIER2_CC}
+      - CCE_OPSALERT_TIER3_CC=${CCE_OPSALERT_TIER3_CC}
 
 generatorOptions:
   disableNameSuffixHash: true
@@ -118,7 +152,14 @@ patches:
         value: Always
   - target:
       kind: Deployment
-      name: cce-compliance-service
+      name: cce-protocol-service
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: Deployment
+      name: cce-matcher-service
     patch: |
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
@@ -146,7 +187,7 @@ patches:
         value: Always
   - target:
       kind: Deployment
-      name: cce-scheduler-service
+      name: cce-step-sla-service
     patch: |
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
@@ -170,8 +211,11 @@ images:
   - name: ghcr.io/openphc/cce-collector-service
     newName: ghcr.io/openphc/cce-collector-service
     newTag: latest
-  - name: ghcr.io/openphc/cce-compliance-service
-    newName: ghcr.io/openphc/cce-compliance-service
+  - name: ghcr.io/openphc/cce-protocol-service
+    newName: ghcr.io/openphc/cce-protocol-service
+    newTag: latest
+  - name: ghcr.io/openphc/cce-matcher-service
+    newName: ghcr.io/openphc/cce-matcher-service
     newTag: latest
   - name: ghcr.io/openphc/cce-intelligence-service
     newName: ghcr.io/openphc/cce-intelligence-service
@@ -182,14 +226,17 @@ images:
   - name: ghcr.io/openphc/openhim-cce-emitter-adaptor
     newName: ghcr.io/openphc/openhim-cce-emitter-adaptor
     newTag: latest
+  # Insights: demo-rw-latest is built from the insights repos' demo-rw branch. For CCE 2.0 that branch
+  # carries demo-rw-v2 (2.0 ClickHouse schema: matcher_event_logs, step_status / sla_status); a 1.x
+  # build cannot read the 2.0 ClickHouse.
   - name: ghcr.io/openphc/cce-insights-service
     newName: ghcr.io/openphc/cce-insights-service
     newTag: demo-rw-latest
   - name: ghcr.io/openphc/cce-insights-ui
     newName: ghcr.io/openphc/cce-insights-ui
     newTag: demo-rw-latest
-  - name: ghcr.io/openphc/cce-scheduler-service
-    newName: ghcr.io/openphc/cce-scheduler-service
+  - name: ghcr.io/openphc/cce-step-sla-service
+    newName: ghcr.io/openphc/cce-step-sla-service
     newTag: latest
 
 commonLabels:
