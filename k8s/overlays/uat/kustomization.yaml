@@ -5,6 +5,8 @@ namespace: cce-uat
 
 resources:
   - ../../base
+  # The emitter adaptor for this implementation's source system: exactly one of k8s/emitters/<name>.
+  - ../../emitters/openhim
   - namespace.yaml
   - ratelimit.yaml
 
